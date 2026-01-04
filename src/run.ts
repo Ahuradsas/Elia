@@ -6,13 +6,27 @@ import {
   runChatControllers,
   Env,
   OpenaiChatAdapter,
+  runCronHandlers,
+  JobRepository,
+  PgJobRepository,
+  CronJobRepository,
+  PgCronJobRepository,
+  Locker,
+  PgLocker,
 } from '@wabot-dev/framework'
-import { MyController } from './controllers/MyController'
+import { ChatController } from './controllers/ChatController'
 import { Pool } from 'pg'
+import { AgendaSlotGenerator } from './cron/AgendaSlotGenerator'
 const env = container.resolve(Env)
 
 container.registerInstance(Pool, new Pool({ connectionString: env.requireString('DATABASE_URL') }))
+container.registerType(Locker, PgLocker)
 
 container.registerType(ChatAdapter, OpenaiChatAdapter)
 container.registerType(ChatRepository, PgChatRepository)
-runChatControllers([MyController])
+
+container.registerType(JobRepository, PgJobRepository)
+container.registerType(CronJobRepository, PgCronJobRepository)
+
+runChatControllers([ChatController])
+runCronHandlers([AgendaSlotGenerator])
