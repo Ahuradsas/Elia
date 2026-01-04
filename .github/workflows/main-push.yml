@@ -1,0 +1,55 @@
+name: Main Push
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  IMAGE: ${{ vars.REGISTRY }}/${{ vars.REGISTRY_REPOSITORY }}:${{ github.sha }}
+  IMAGE_LATEST: ${{ vars.REGISTRY }}/${{ vars.REGISTRY_REPOSITORY }}:latest
+
+jobs:
+
+  build:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Docker Login
+      uses: docker/login-action@v3.0.0
+      with:
+        registry: ${{ vars.REGISTRY }}
+        username: ${{ secrets.REGISTRY_USER }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: Build and push images
+      uses: docker/build-push-action@v5.1.0
+      with:
+        context: .
+        file: Dockerfile
+        tags: |
+          ${{ env.IMAGE }}
+          ${{ env.IMAGE_LATEST }}
+        push: true
+        target: app
+
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Set up Kubeconfig
+      run: |
+        kubectl config set-cluster cluster  --server=${{ vars.K8S_SERVER }} --insecure-skip-tls-verify
+        kubectl config set-credentials user --token=${{ secrets.K8S_TOKEN }}
+        kubectl config set-context context --cluster=cluster --user=user --namespace=${{ vars.K8S_NAMESPACE }}
+        kubectl config use-context context
+
+    - name: Deploy to K8S
+      run: |
+        kubectl patch deploy ${{ vars.K8S_DEPLOY }} -p '{"spec": {"template": {"spec": {"containers": [{"name": "${{ vars.K8S_CONTAINER }}", "image": "${{ env.IMAGE }}"}]}}}}'
+        kubectl rollout status deploy ${{ vars.K8S_DEPLOY }} --timeout=300s
+  
