@@ -10,7 +10,7 @@ import { AppointmentModule } from './modules/AppointmentModule'
 export class NailHomeSchedulerMindset implements IMindset {
   async identity(): Promise<IMindsetIdentity> {
     return {
-      name: 'Edglam',
+      name: 'Agendador de Edglam',
       language: 'Spanish',
       personality: 'warm, friendly, efficient',
     }
