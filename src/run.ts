@@ -13,6 +13,10 @@ import {
   PgCronJobRepository,
   Locker,
   PgLocker,
+  WhatsAppReceiver,
+  WhatsAppReceiverByWabotProxy,
+  WhatsAppSender,
+  WhatsAppSenderByWabotProxy,
 } from '@wabot-dev/framework'
 import { ChatController } from './controllers/ChatController'
 import { Pool } from 'pg'
@@ -27,6 +31,9 @@ container.registerType(ChatRepository, PgChatRepository)
 
 container.registerType(JobRepository, PgJobRepository)
 container.registerType(CronJobRepository, PgCronJobRepository)
+
+container.registerType(WhatsAppReceiver, WhatsAppReceiverByWabotProxy)
+container.registerType(WhatsAppSender, WhatsAppSenderByWabotProxy)
 
 runChatControllers([ChatController])
 runCronHandlers([AgendaSlotGenerator])

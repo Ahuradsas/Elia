@@ -15,7 +15,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@wabot-dev/framework": "0.4.0-beta.6"
+    "@wabot-dev/framework": "0.4.0-beta.9"
   },
   "devDependencies": {
     "@swc/core": "^1.15.8",

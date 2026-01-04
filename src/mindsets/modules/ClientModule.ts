@@ -67,7 +67,7 @@ export class ClientModule {
 
   @description('read the phone of user')
   async getUserPhone(): Promise<string | null> {
-    const connectedWhatsApp = '573206256406'
-    return connectedWhatsApp
+    const whatsApp = this.chat.connections.find((x) => x.channelName === 'WhatsAppChannel')?.id
+    return whatsApp ?? null
   }
 }

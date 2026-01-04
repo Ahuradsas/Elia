@@ -87,7 +87,5 @@ export class AgendaSlotGenerator {
     for (const slot of slotsToCreate) {
       await this.agendaSlotRepository.create(slot)
     }
-
-    console.log(`[AgendaSlotGenerator] Created ${slotsToCreate.length} new slots.`)
   }
 }
