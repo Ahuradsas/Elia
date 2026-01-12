@@ -1,6 +1,7 @@
 import test, { describe } from 'node:test'
 import assert from 'node:assert/strict'
-import { TimeSlotEngine, ITimeRange, IWorkingHours, IAppointment } from './TimeSlotEngine'
+import { TimeSlotEngine, IWorkingHours, IAppointment } from './TimeSlotEngine'
+import { ITimeRange } from './ITimeRange'
 
 /**
  * Helpers

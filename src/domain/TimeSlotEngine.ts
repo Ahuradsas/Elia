@@ -1,7 +1,4 @@
-export type ITimeRange = {
-  start: number
-  end: number
-}
+import { ITimeRange } from './ITimeRange'
 
 export type IAppointment = {
   assessorId: string
