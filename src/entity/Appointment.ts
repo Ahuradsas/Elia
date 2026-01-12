@@ -5,7 +5,7 @@ export type IAppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancel
 export interface IAppointmentData extends IEntityData {
   clientId: string
   serviceId: string
-  slotId: string
+  serviceName: string
   address: string
   scheduledAt: number
   status: IAppointmentStatus
