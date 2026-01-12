@@ -12,9 +12,8 @@ import {
 /** Request classes for ClientModule */
 export class UpdateClientReq {
   @isString()
-  @description('Nombre completo de la clienta. Opcional si ya está registrado')
-  @isOptional()
-  name?: string
+  @description('Nombre completo de la clienta')
+  name!: string
 
   @isString()
   @description('Número de teléfono de la clienta (clave para identificarla)')
@@ -45,7 +44,7 @@ export class ClientModule {
     let client = clientId ? await this.clientRepository.findOrThrow(clientId) : null
 
     if (!client) {
-      client = new Client({ phone: req.phone })
+      client = new Client({ phone: req.phone, name: req.name })
       await this.clientRepository.create(client)
       this.chat.addAssociation({ type: 'Client', id: client.id })
       await (this.chatRepository as any).update(this.chat)

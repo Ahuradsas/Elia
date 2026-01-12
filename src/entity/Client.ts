@@ -1,11 +1,12 @@
 import { Entity, IEntityData } from '@wabot-dev/framework'
 
 export interface IClientData extends IEntityData {
-  name?: string
+  name: string
   phone: string
   address?: string
   zone?: string
   notes?: string
+  email?: string
   lastAppointmentAt?: number
 }
 
