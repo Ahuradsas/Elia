@@ -9,7 +9,7 @@
     "start": "node ./dist/run.js",
     "fmt": "prettier --write .",
     "tsc": "tsc --noEmit",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:unit": "node --import @yucacodes/ts  --test './src/**/*.unit.test.ts'"
   },
   "author": "",
   "license": "ISC",
