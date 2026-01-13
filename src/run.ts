@@ -2,26 +2,25 @@ import {
   ChatAdapter,
   ChatRepository,
   container,
-  PgChatRepository,
-  runChatControllers,
-  Env,
-  OpenaiChatAdapter,
-  runCronHandlers,
-  JobRepository,
-  PgJobRepository,
   CronJobRepository,
-  PgCronJobRepository,
+  Env,
+  JobRepository,
   Locker,
+  OpenaiChatAdapter,
+  PgChatRepository,
+  PgCronJobRepository,
+  PgJobRepository,
   PgLocker,
+  runChatControllers,
+  runRestControllers,
   WhatsAppReceiver,
   WhatsAppReceiverByWabotProxy,
   WhatsAppSender,
   WhatsAppSenderByWabotProxy,
-  runRestControllers,
 } from '@wabot-dev/framework'
-import { ChatController } from './controllers/ChatController'
 import { Pool } from 'pg'
-import { AgendaSlotGenerator } from './cron/AgendaSlotGenerator'
+import { ChatController } from './controllers/ChatController'
+
 import { ReadyController } from './controllers/ReadyController'
 import { EliaBusinessId, EliaPool } from './elia-injection'
 const env = container.resolve(Env)
@@ -45,4 +44,3 @@ container.register(EliaPool, {
 
 runRestControllers([ReadyController])
 runChatControllers([ChatController])
-runCronHandlers([AgendaSlotGenerator])

@@ -5,20 +5,32 @@ import { Chat, description, isNumber, isString, mindsetModule } from '@wabot-dev
 /** Request classes for AppointmentModule */
 export class ScheduleAppointmentReq {
   @isString()
-  @description('ID del servicio de uñas que se desea reservar')
+  @description('ID del servicio que se desea reservar')
   serviceId!: string
 
   @isString()
-  @description('ID del slot de agenda donde se realizará la cita')
-  slotId!: string
+  @description('Nombre del servicio')
+  serviceName!: string
+
+  @isString()
+  @description('ID del staff responsable del servicio')
+  teamMemberId!: string
 
   @isString()
   @description('Dirección donde se realizará el servicio')
   address!: string
 
+  @isString()
+  @description('Barrio o zona donde se realizará el servicio')
+  zone!: string
+
   @isNumber()
   @description('Fecha y hora programada para la cita (timestamp ms)')
   scheduledAt!: number
+
+  @isNumber()
+  @description('Fecha y hora de finalización para la cita (timestamp ms)')
+  scheduledEndAt!: number
 }
 
 export class AppointmentIdReq {
@@ -43,9 +55,12 @@ export class AppointmentModule {
     const appointment = new Appointment({
       clientId,
       serviceId: req.serviceId,
-      slotId: req.slotId,
+      serviceName: req.serviceName,
+      teamMemberId: req.teamMemberId,
       address: req.address,
+      zone: req.zone,
       scheduledAt: req.scheduledAt,
+      scheduledEndAt: req.scheduledEndAt,
       status: 'pending',
     })
 
@@ -53,12 +68,12 @@ export class AppointmentModule {
     return appointment
   }
 
-  @description('Cancel an appointment')
-  async cancelAppointment(req: AppointmentIdReq): Promise<Appointment> {
-    const appointment = await this.appointmentRepository.find(req.appointmentId)
-    if (!appointment) throw new Error(`Appointment ${req.appointmentId} not found`)
-    appointment.cancel()
-    await this.appointmentRepository.update(appointment)
-    return appointment
-  }
+  // @description('Cancel an appointment')
+  // async cancelAppointment(req: AppointmentIdReq): Promise<Appointment> {
+  //   const appointment = await this.appointmentRepository.find(req.appointmentId)
+  //   if (!appointment) throw new Error(`Appointment ${req.appointmentId} not found`)
+  //   appointment.cancel()
+  //   await this.appointmentRepository.update(appointment)
+  //   return appointment
+  // }
 }

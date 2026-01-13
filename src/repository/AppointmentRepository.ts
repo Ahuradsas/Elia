@@ -87,11 +87,11 @@ export class AppointmentRepository {
     const query = `
       SELECT ${this.columns}
       FROM ${this.table}
-      WHERE appointment_time <= $2
-        AND appointment_end_time >= $1
+      WHERE (appointment_date + appointment_time) <= $2::timestamptz
+        AND (appointment_date + appointment_end_time) >= $1::timestamptz
         AND business_id = $3
     `
-    return await this.query(query, [startAt, endAt, this.businessId])
+    return await this.query(query, [startAt.toISOString(), endAt.toISOString(), this.businessId])
   }
 
   private query(sql: string, vars: any[]): Promise<Appointment[]> {

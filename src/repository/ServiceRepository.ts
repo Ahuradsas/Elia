@@ -46,6 +46,7 @@ export class ServiceRepository {
       return result.rows.map(
         (x) =>
           new Service({
+            id: x.id,
             name: x.name,
             durationMinutes: x.duration,
             price: x.price,
