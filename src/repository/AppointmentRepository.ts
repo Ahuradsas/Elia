@@ -8,7 +8,7 @@ import { v4 } from 'uuid'
 export class AppointmentRepository {
   private table = '"public"."appointments"'
   private columns =
-    '"id", "business_id", "client_id",  "service_id", "service_name", "appointment_date", "appointment_time", "status"'
+    '"id", "business_id", "client_id",  "service_id", "service_name", "appointment_date", "appointment_time", "appointment_end_time", "direccion", "zona_barrio", "status", "team_member_id"'
 
   constructor(
     @inject(EliaPool) private pool: Pool,
@@ -36,7 +36,7 @@ export class AppointmentRepository {
   async create(item: Appointment): Promise<void> {
     const sql = `
       INSERT INTO ${this.table}(${this.columns})
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
     `
     const data = item['data']
     data.id = v4()
@@ -51,7 +51,11 @@ export class AppointmentRepository {
       data.serviceName,
       new Date(data.scheduledAt),
       new Date(data.scheduledAt),
+      new Date(data.scheduledEndAt),
+      data.address,
+      data.zone,
       data.status,
+      data.teamMemberId,
     ])
   }
 
@@ -100,9 +104,12 @@ export class AppointmentRepository {
             clientId: x.client_id,
             serviceId: x.service_id,
             serviceName: x.service_name,
-            address: '',
+            address: x.direction,
             scheduledAt: x.appointment_time.getTime(),
+            scheduledEndAt: x.appointment_end_time.getTime(),
+            zone: x.zona_barrio,
             status: x.status,
+            teamMemberId: x.team_member_id,
           }),
       )
     })

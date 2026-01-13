@@ -6,9 +6,10 @@ export type IAppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancel
 export interface IAppointmentData extends IEntityData {
   clientId: string
   serviceId: string
-  attendantId: string
+  teamMemberId: string
   serviceName: string
   address: string
+  zone: string
   scheduledAt: number
   scheduledEndAt: number
   status: IAppointmentStatus
@@ -22,7 +23,7 @@ export class Appointment extends Entity<IAppointmentData> implements IAppointmen
   }
 
   get teamMemberId() {
-    return this.data.attendantId
+    return this.data.teamMemberId
   }
 
   get range() {
