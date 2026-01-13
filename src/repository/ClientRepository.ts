@@ -86,6 +86,7 @@ export class ClientRepository {
       return result.rows.map(
         (x) =>
           new Client({
+            id: x.id,
             name: x.full_name,
             phone: x.phone,
             email: x.email,
