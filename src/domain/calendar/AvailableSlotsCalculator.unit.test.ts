@@ -1,7 +1,9 @@
 import test, { describe } from 'node:test'
 import assert from 'node:assert/strict'
-import { TimeSlotEngine, IWorkingHours, IAppointment } from './TimeSlotEngine'
+import { AvailableSlotsCalculator } from './AvailableSlotsCalculator'
 import { ITimeRange } from './ITimeRange'
+import { ITeamMemberWorkSlots } from './ITeamMemberWorkSlots'
+import { IAppointmentAssignation } from './IAppointmentAssignation'
 
 /**
  * Helpers
@@ -13,20 +15,20 @@ const range = (start: number, end: number): ITimeRange => ({
   end: minutes(end),
 })
 
-describe(TimeSlotEngine.name, () => {
+describe(AvailableSlotsCalculator.name, () => {
   test('generates slots using requested duration and interval', () => {
-    const workingHours: IWorkingHours[] = [
+    const workingHours: ITeamMemberWorkSlots[] = [
       {
-        assessorId: 'A1',
+        teamMemberId: 'A1',
         ranges: [range(0, 120)], // 2 hours
       },
     ]
 
-    const engine = new TimeSlotEngine(workingHours, [])
+    const engine = new AvailableSlotsCalculator(workingHours, [])
 
     const slots = engine.calculateSlots({
-      duration: minutes(30),
-      interval: minutes(15),
+      durationMs: minutes(30),
+      intervalMs: minutes(15),
     })
 
     assert.equal(slots.length, 7)
@@ -45,18 +47,18 @@ describe(TimeSlotEngine.name, () => {
   })
 
   test('handles multiple working hour ranges per assessor', () => {
-    const workingHours: IWorkingHours[] = [
+    const workingHours: ITeamMemberWorkSlots[] = [
       {
-        assessorId: 'A1',
+        teamMemberId: 'A1',
         ranges: [range(0, 60), range(120, 180)],
       },
     ]
 
-    const engine = new TimeSlotEngine(workingHours, [])
+    const engine = new AvailableSlotsCalculator(workingHours, [])
 
     const slots = engine.calculateSlots({
-      duration: minutes(30),
-      interval: minutes(30),
+      durationMs: minutes(30),
+      intervalMs: minutes(30),
     })
 
     assert.deepEqual(
@@ -71,43 +73,43 @@ describe(TimeSlotEngine.name, () => {
   })
 
   test('does not mix appointments between assessors', () => {
-    const workingHours: IWorkingHours[] = [
-      { assessorId: 'A1', ranges: [range(0, 60)] },
-      { assessorId: 'A2', ranges: [range(0, 60)] },
+    const workingHours: ITeamMemberWorkSlots[] = [
+      { teamMemberId: 'A1', ranges: [range(0, 60)] },
+      { teamMemberId: 'A2', ranges: [range(0, 60)] },
     ]
 
-    const appointments: IAppointment[] = [
+    const appointments: IAppointmentAssignation[] = [
       {
-        assessorId: 'A1',
+        teamMemberId: 'A1',
         range: range(0, 60),
       },
     ]
 
-    const engine = new TimeSlotEngine(workingHours, appointments)
+    const engine = new AvailableSlotsCalculator(workingHours, appointments)
 
     const slots = engine.calculateSlots({
-      duration: minutes(30),
-      interval: minutes(30),
+      durationMs: minutes(30),
+      intervalMs: minutes(30),
     })
 
-    assert.equal(slots.filter((s) => s.assessorId === 'A1').length, 0)
+    assert.equal(slots.filter((s) => s.teamMemberId === 'A1').length, 0)
 
-    assert.equal(slots.filter((s) => s.assessorId === 'A2').length, 2)
+    assert.equal(slots.filter((s) => s.teamMemberId === 'A2').length, 2)
   })
 
   test('allows slots that exactly fit working range', () => {
-    const workingHours: IWorkingHours[] = [
+    const workingHours: ITeamMemberWorkSlots[] = [
       {
-        assessorId: 'A1',
+        teamMemberId: 'A1',
         ranges: [range(0, 30)],
       },
     ]
 
-    const engine = new TimeSlotEngine(workingHours, [])
+    const engine = new AvailableSlotsCalculator(workingHours, [])
 
     const slots = engine.calculateSlots({
-      duration: minutes(30),
-      interval: minutes(15),
+      durationMs: minutes(30),
+      intervalMs: minutes(15),
     })
 
     assert.equal(slots.length, 1)
@@ -115,31 +117,31 @@ describe(TimeSlotEngine.name, () => {
   })
 
   test('returns empty array when no slot can fit', () => {
-    const workingHours: IWorkingHours[] = [
+    const workingHours: ITeamMemberWorkSlots[] = [
       {
-        assessorId: 'A1',
+        teamMemberId: 'A1',
         ranges: [range(0, 20)],
       },
     ]
 
-    const engine = new TimeSlotEngine(workingHours, [])
+    const engine = new AvailableSlotsCalculator(workingHours, [])
 
     const slots = engine.calculateSlots({
-      duration: minutes(30),
-      interval: minutes(15),
+      durationMs: minutes(30),
+      intervalMs: minutes(15),
     })
 
     assert.equal(slots.length, 0)
   })
 
   test('appointment buffer prevents overlapping slots', () => {
-    const workingHours: IWorkingHours[] = [
-      { assessorId: 'A1', ranges: [range(0, 120)] }, // 0 - 120 min
+    const workingHours: ITeamMemberWorkSlots[] = [
+      { teamMemberId: 'A1', ranges: [range(0, 120)] }, // 0 - 120 min
     ]
 
-    const appointments: IAppointment[] = [
+    const appointments: IAppointmentAssignation[] = [
       {
-        assessorId: 'A1',
+        teamMemberId: 'A1',
         range: range(30, 60), // 30-60
         bufferBeforeMs: minutes(10), // blocked 20-30
         bufferAfterMs: minutes(15), // blocked 60-75
@@ -147,11 +149,11 @@ describe(TimeSlotEngine.name, () => {
       },
     ]
 
-    const engine = new TimeSlotEngine(workingHours, appointments)
+    const engine = new AvailableSlotsCalculator(workingHours, appointments)
 
     const slots = engine.calculateSlots({
-      duration: minutes(15),
-      interval: minutes(15),
+      durationMs: minutes(15),
+      intervalMs: minutes(15),
     })
 
     const expected = [
@@ -168,15 +170,15 @@ describe(TimeSlotEngine.name, () => {
   })
 
   test('slot request buffer prevents generating slots too close to edges', () => {
-    const workingHours: IWorkingHours[] = [
-      { assessorId: 'A1', ranges: [range(0, 120)] }, // 0 - 120 min
+    const workingHours: ITeamMemberWorkSlots[] = [
+      { teamMemberId: 'A1', ranges: [range(0, 120)] }, // 0 - 120 min
     ]
 
-    const engine = new TimeSlotEngine(workingHours, [])
+    const engine = new AvailableSlotsCalculator(workingHours, [])
 
     const slots = engine.calculateSlots({
-      duration: minutes(30),
-      interval: minutes(15),
+      durationMs: minutes(30),
+      intervalMs: minutes(15),
       bufferBeforeMs: minutes(10),
       bufferAfterMs: minutes(20),
     })
@@ -189,11 +191,11 @@ describe(TimeSlotEngine.name, () => {
   })
 
   test('combination of appointment buffer and slot request buffer', () => {
-    const workingHours: IWorkingHours[] = [{ assessorId: 'A1', ranges: [range(0, 120)] }]
+    const workingHours: ITeamMemberWorkSlots[] = [{ teamMemberId: 'A1', ranges: [range(0, 120)] }]
 
-    const appointments: IAppointment[] = [
+    const appointments: IAppointmentAssignation[] = [
       {
-        assessorId: 'A1',
+        teamMemberId: 'A1',
         range: range(30, 60),
         bufferBeforeMs: minutes(5),
         bufferAfterMs: minutes(10),
@@ -201,11 +203,11 @@ describe(TimeSlotEngine.name, () => {
       },
     ]
 
-    const engine = new TimeSlotEngine(workingHours, appointments)
+    const engine = new AvailableSlotsCalculator(workingHours, appointments)
 
     const slots = engine.calculateSlots({
-      duration: minutes(15),
-      interval: minutes(15),
+      durationMs: minutes(15),
+      intervalMs: minutes(15),
       bufferBeforeMs: minutes(10),
       bufferAfterMs: minutes(10),
     })
@@ -223,13 +225,13 @@ describe(TimeSlotEngine.name, () => {
   })
 
   test('slot buffer respects working hours boundaries', () => {
-    const workingHours: IWorkingHours[] = [{ assessorId: 'A1', ranges: [range(0, 120)] }]
+    const workingHours: ITeamMemberWorkSlots[] = [{ teamMemberId: 'A1', ranges: [range(0, 120)] }]
 
-    const engine = new TimeSlotEngine(workingHours, [])
+    const engine = new AvailableSlotsCalculator(workingHours, [])
 
     const slots = engine.calculateSlots({
-      duration: minutes(30),
-      interval: minutes(15),
+      durationMs: minutes(30),
+      intervalMs: minutes(15),
       bufferAfterMs: minutes(20), // cannot extend past 120
     })
 

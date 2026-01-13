@@ -1,23 +1,23 @@
 import { ITimeRange } from './ITimeRange'
 
-export type IDayWorkingHours = {
+export type IDayOfWeekWorkSlots = {
   dayOfWeek: number // 0 = Sunday, 6 = Saturday
   ranges: { startHour: number; startMinute: number; endHour: number; endMinute: number }[]
 }
 
-export type ISpecialDay = {
+export type ISpecialDayWorkSlots = {
   date: string // YYYY-MM-DD
   ranges: { startHour: number; startMinute: number; endHour: number; endMinute: number }[]
 }
 
-export type IWorkingHoursCalculatorConfig = {
+export type IWorkSlotsCalculatorConfig = {
   timeZone: string
-  weeklyConfig: IDayWorkingHours[]
-  specialDays?: ISpecialDay[]
+  weeklyConfig: IDayOfWeekWorkSlots[]
+  specialDays?: ISpecialDayWorkSlots[]
 }
 
-export class WorkingHoursCalculator {
-  constructor(private readonly config: IWorkingHoursCalculatorConfig) {}
+export class WorkSlotsCalculator {
+  constructor(private readonly config: IWorkSlotsCalculatorConfig) {}
 
   calculate(startDate: Date, endDate: Date): ITimeRange[] {
     const ranges: ITimeRange[] = []

@@ -1,42 +1,28 @@
+import { IAppointmentAssignation } from './IAppointmentAssignation'
+import { ITeamMemberAvailableSlot } from './ITeamMemberAvailableSlot'
+import { ITeamMemberWorkSlots } from './ITeamMemberWorkSlots'
 import { ITimeRange } from './ITimeRange'
 
-export type IAppointment = {
-  assessorId: string
-  range: ITimeRange
+export type ICalculateAvailableSlotsReq = {
+  durationMs: number
+  intervalMs: number
   bufferBeforeMs?: number
   bufferAfterMs?: number
 }
 
-export type IWorkingHours = {
-  assessorId: string
-  ranges: ITimeRange[]
-}
-
-export type ISlotRequest = {
-  duration: number
-  interval: number
-  bufferBeforeMs?: number
-  bufferAfterMs?: number
-}
-
-export type IAvailableSlot = {
-  assessorId: string
-  range: ITimeRange
-}
-
-export class TimeSlotEngine {
+export class AvailableSlotsCalculator {
   constructor(
-    private readonly workingHours: IWorkingHours[],
-    private readonly appointments: IAppointment[],
+    private readonly teamMembersWorkSlots: ITeamMemberWorkSlots[],
+    private readonly appointmentsAssignations: IAppointmentAssignation[],
   ) {}
 
-  calculateSlots(request: ISlotRequest): IAvailableSlot[] {
-    const slots: IAvailableSlot[] = []
+  calculateSlots(request: ICalculateAvailableSlotsReq): ITeamMemberAvailableSlot[] {
+    const slots: ITeamMemberAvailableSlot[] = []
 
-    for (const wh of this.workingHours) {
+    for (const wh of this.teamMembersWorkSlots) {
       // Step 1: get blocked ranges for this assessor
-      const blocked = this.appointments
-        .filter((a) => a.assessorId === wh.assessorId)
+      const blocked = this.appointmentsAssignations
+        .filter((a) => a.teamMemberId === wh.teamMemberId)
         .map((a) => this.toBlockedRange(a))
         .sort((a, b) => a.start - b.start)
 
@@ -46,7 +32,7 @@ export class TimeSlotEngine {
 
         // Step 3: generate slots in each free range
         for (const free of freeRanges) {
-          slots.push(...this.generateSlotsWithBuffers(wh.assessorId, free, request))
+          slots.push(...this.generateSlotsWithBuffers(wh.teamMemberId, free, request))
         }
       }
     }
@@ -81,7 +67,7 @@ export class TimeSlotEngine {
   // Appointment → blocked range
   // ──────────────────────────────────────────────
 
-  private toBlockedRange(a: IAppointment): ITimeRange {
+  private toBlockedRange(a: IAppointmentAssignation): ITimeRange {
     return {
       start: Math.max(0, a.range.start - (a.bufferBeforeMs ?? 0)),
       end: a.range.end + (a.bufferAfterMs ?? 0),
@@ -93,12 +79,17 @@ export class TimeSlotEngine {
   // ──────────────────────────────────────────────
 
   private generateSlotsWithBuffers(
-    assessorId: string,
+    teamMemberId: string,
     free: ITimeRange,
-    request: ISlotRequest,
-  ): IAvailableSlot[] {
-    const { duration, interval, bufferBeforeMs = 0, bufferAfterMs = 0 } = request
-    const slots: IAvailableSlot[] = []
+    request: ICalculateAvailableSlotsReq,
+  ): ITeamMemberAvailableSlot[] {
+    const {
+      durationMs: duration,
+      intervalMs: interval,
+      bufferBeforeMs = 0,
+      bufferAfterMs = 0,
+    } = request
+    const slots: ITeamMemberAvailableSlot[] = []
 
     // Step 1: adjust free range by slot buffers
     const start = free.start + bufferBeforeMs
@@ -110,7 +101,7 @@ export class TimeSlotEngine {
     // Step 2: generate sliding slots
     for (let t = start; t <= lastStart; t += interval) {
       slots.push({
-        assessorId,
+        teamMemberId,
         range: { start: t, end: t + duration },
       })
     }

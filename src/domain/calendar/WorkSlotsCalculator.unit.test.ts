@@ -1,12 +1,12 @@
 import test, { describe } from 'node:test'
 import assert from 'node:assert/strict'
-import { WorkingHoursCalculator } from './WorkingHoursCalculator'
+import { WorkSlotsCalculator } from './WorkSlotsCalculator'
 
-describe('WorkingHoursCalculator', () => {
+describe(WorkSlotsCalculator.name, () => {
   const ms = (h: number, m: number) => h * 60 * 60 * 1000 + m * 60 * 1000
 
   test('generates ranges for a single weekly day', () => {
-    const calculator = new WorkingHoursCalculator({
+    const calculator = new WorkSlotsCalculator({
       timeZone: 'UTC',
       weeklyConfig: [
         { dayOfWeek: 1, ranges: [{ startHour: 9, startMinute: 0, endHour: 17, endMinute: 0 }] }, // Monday
@@ -22,7 +22,7 @@ describe('WorkingHoursCalculator', () => {
   })
 
   test('handles multiple weekly days', () => {
-    const calculator = new WorkingHoursCalculator({
+    const calculator = new WorkSlotsCalculator({
       timeZone: 'UTC',
       weeklyConfig: [
         { dayOfWeek: 1, ranges: [{ startHour: 9, startMinute: 0, endHour: 17, endMinute: 0 }] }, // Monday
@@ -41,7 +41,7 @@ describe('WorkingHoursCalculator', () => {
   })
 
   test('special day overrides weekly config', () => {
-    const calculator = new WorkingHoursCalculator({
+    const calculator = new WorkSlotsCalculator({
       timeZone: 'UTC',
       weeklyConfig: [
         { dayOfWeek: 1, ranges: [{ startHour: 9, startMinute: 0, endHour: 17, endMinute: 0 }] }, // Monday
@@ -63,7 +63,7 @@ describe('WorkingHoursCalculator', () => {
   })
 
   test('handles multiple days with special days', () => {
-    const calculator = new WorkingHoursCalculator({
+    const calculator = new WorkSlotsCalculator({
       timeZone: 'UTC',
       weeklyConfig: [
         { dayOfWeek: 1, ranges: [{ startHour: 9, startMinute: 0, endHour: 17, endMinute: 0 }] },
@@ -88,7 +88,7 @@ describe('WorkingHoursCalculator', () => {
   })
 
   test('produces UTC timestamps correctly in non-UTC timezone', () => {
-    const calculator = new WorkingHoursCalculator({
+    const calculator = new WorkSlotsCalculator({
       timeZone: 'America/New_York',
       weeklyConfig: [
         { dayOfWeek: 1, ranges: [{ startHour: 9, startMinute: 0, endHour: 17, endMinute: 0 }] }, // Monday
@@ -109,7 +109,7 @@ describe('WorkingHoursCalculator', () => {
   })
 
   test('returns empty array when no working hours', () => {
-    const calculator = new WorkingHoursCalculator({
+    const calculator = new WorkSlotsCalculator({
       timeZone: 'UTC',
       weeklyConfig: [],
     })

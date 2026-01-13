@@ -1,5 +1,5 @@
-import { NailService } from '@/entity/NailService'
-import { NailServiceRepository } from '@/repository/NailServiceRepository'
+import { Service } from '@/entity/Service'
+import { ServiceRepository } from '@/repository/ServiceRepository'
 import { description, isString, mindsetModule } from '@wabot-dev/framework'
 
 /** Request classes for NailServiceModule */
@@ -11,15 +11,15 @@ export class GetServiceByIdReq {
 
 @mindsetModule()
 export class NailServiceModule {
-  constructor(private nailServiceRepository: NailServiceRepository) {}
+  constructor(private nailServiceRepository: ServiceRepository) {}
 
   @description('Fetch all active nail services for the client')
-  async getActiveServices(): Promise<NailService[]> {
+  async getActiveServices(): Promise<Service[]> {
     return this.nailServiceRepository.findActive()
   }
 
   @description('Fetch a specific nail service by ID')
-  async getServiceById(req: GetServiceByIdReq): Promise<NailService | null> {
+  async getServiceById(req: GetServiceByIdReq): Promise<Service | null> {
     return this.nailServiceRepository.find(req.serviceId)
   }
 }
