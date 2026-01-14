@@ -6,7 +6,7 @@ import { Pool } from 'pg'
 @singleton()
 export class DayOfWeekWorkHoursRepository {
   private table = '"public"."business_working_hours"'
-  private columns = '"id", "business_id", "day_of_week"'
+  private columns = '"id", "business_id", "day_of_week", "open_time", "close_time"'
 
   constructor(
     @inject(EliaPool) private pool: Pool,
@@ -45,7 +45,14 @@ export class DayOfWeekWorkHoursRepository {
           new DayOfWeekWorkHours({
             id: x.id,
             dayOfWeek: x.day_of_week,
-            ranges: [],
+            ranges: [
+              {
+                startHour: Number(x.open_time.split(':')[0]),
+                startMinute: Number(x.open_time.split(':')[1]),
+                endHour: Number(x.close_time.split(':')[0]),
+                endMinute: Number(x.close_time.split(':')[1]),
+              },
+            ],
           }),
       )
     })

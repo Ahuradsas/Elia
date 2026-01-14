@@ -1,6 +1,6 @@
 import { Appointment } from '@/entity/Appointment'
 import { AppointmentRepository } from '@/repository/AppointmentRepository'
-import { Chat, description, isNumber, isString, mindsetModule } from '@wabot-dev/framework'
+import { Chat, description, isDate, isString, mindsetModule } from '@wabot-dev/framework'
 
 /** Request classes for AppointmentModule */
 export class ScheduleAppointmentReq {
@@ -24,13 +24,13 @@ export class ScheduleAppointmentReq {
   @description('Barrio o zona donde se realizará el servicio')
   zone!: string
 
-  @isNumber()
-  @description('Fecha y hora programada para la cita (timestamp ms)')
-  scheduledAt!: number
+  @isDate()
+  @description('Fecha y hora programada para la cita')
+  scheduledAt!: Date
 
-  @isNumber()
-  @description('Fecha y hora de finalización para la cita (timestamp ms)')
-  scheduledEndAt!: number
+  @isDate()
+  @description('Fecha y hora de finalización para la cita')
+  scheduledEndAt!: Date
 }
 
 export class AppointmentIdReq {
@@ -59,8 +59,8 @@ export class AppointmentModule {
       teamMemberId: req.teamMemberId,
       address: req.address,
       zone: req.zone,
-      scheduledAt: req.scheduledAt,
-      scheduledEndAt: req.scheduledEndAt,
+      scheduledAt: req.scheduledAt.getTime(),
+      scheduledEndAt: req.scheduledEndAt.getTime(),
       status: 'pending',
     })
 

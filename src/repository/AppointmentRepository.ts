@@ -1,4 +1,6 @@
-import { EliaBusinessId, EliaPool } from '@/elia-injection'
+import { getDatePartsInTimeZone } from '@/domain/calendar/getDatePartsInTimeZone'
+import { getTimeZoneOffset } from '@/domain/calendar/getTimeZoneOffset'
+import { EliaBusinessId, EliaBusinessTz, EliaPool } from '@/elia-injection'
 import { Appointment } from '@/entity/Appointment'
 import { inject, singleton, withPgClient } from '@wabot-dev/framework'
 import { Pool } from 'pg'
@@ -13,6 +15,7 @@ export class AppointmentRepository {
   constructor(
     @inject(EliaPool) private pool: Pool,
     @inject(EliaBusinessId) private businessId: string,
+    @inject(EliaBusinessTz) private tz: string,
   ) {}
 
   async find(id: string): Promise<Appointment | null> {
@@ -43,15 +46,25 @@ export class AppointmentRepository {
     data.createdAt = Date.now()
     item.validate()
 
+    const { year, month, day, hour, minute } = getDatePartsInTimeZone(
+      new Date(data.scheduledAt),
+      this.tz,
+    )
+
+    const { hour: endHour, minute: endMinute } = getDatePartsInTimeZone(
+      new Date(data.scheduledEndAt),
+      this.tz,
+    )
+
     await this.exec(sql, [
       data.id,
       this.businessId,
       data.clientId,
       data.serviceId,
       data.serviceName,
-      new Date(data.scheduledAt),
-      new Date(data.scheduledAt),
-      new Date(data.scheduledEndAt),
+      `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`,
+      `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+      `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`,
       data.address,
       data.zone,
       data.status,
@@ -97,21 +110,42 @@ export class AppointmentRepository {
   private query(sql: string, vars: any[]): Promise<Appointment[]> {
     return withPgClient(this.pool, async (client) => {
       const result = await client.query(sql, vars)
-      return result.rows.map(
-        (x) =>
-          new Appointment({
-            id: x.id,
-            clientId: x.client_id,
-            serviceId: x.service_id,
-            serviceName: x.service_name,
-            address: x.direction,
-            scheduledAt: x.appointment_time.getTime(),
-            scheduledEndAt: x.appointment_end_time.getTime(),
-            zone: x.zona_barrio,
-            status: x.status,
-            teamMemberId: x.team_member_id,
-          }),
-      )
+      return result.rows.map((x) => {
+        const [year, month, date] = [
+          x.appointment_date.getFullYear(),
+          x.appointment_date.getMonth(),
+          x.appointment_date.getDate(),
+        ]
+        const [hour, minute] = x.appointment_time.split(':')
+        const [endHour, endMinute] = x.appointment_end_time.split(':')
+
+        const tzOffset = getTimeZoneOffset(this.tz, x.appointment_date)
+
+        const scheduledAt =
+          Date.UTC(year, month, date, hour, minute) -
+          tzOffset.hours * 3600 * 1000 -
+          tzOffset.minutes * 60 * 1000
+
+        const scheduledEndAt =
+          Date.UTC(year, month, date, endHour, endMinute) -
+          tzOffset.hours * 3600 * 1000 -
+          tzOffset.minutes * 60 * 1000
+
+        const appointment = new Appointment({
+          id: x.id,
+          clientId: x.client_id,
+          serviceId: x.service_id,
+          serviceName: x.service_name,
+          address: x.direction,
+          scheduledAt: scheduledAt,
+          scheduledEndAt: scheduledEndAt,
+          zone: x.zona_barrio,
+          status: x.status,
+          teamMemberId: x.team_member_id,
+        })
+
+        return appointment
+      })
     })
   }
 

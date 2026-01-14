@@ -1,5 +1,7 @@
 import { addCompleteDays } from '@/domain/calendar'
 import { AvailableSlotsCalculator } from '@/domain/calendar/AvailableSlotsCalculator'
+import { getDatePartsInTimeZone } from '@/domain/calendar/getDatePartsInTimeZone'
+import { getTimeZoneOffset } from '@/domain/calendar/getTimeZoneOffset'
 import { WorkSlotsCalculator } from '@/domain/calendar/WorkSlotsCalculator'
 import { AppointmentRepository } from '@/repository/AppointmentRepository'
 import { DayOfWeekWorkHoursRepository } from '@/repository/DayOfWeekWorkHoursRepository'
@@ -21,7 +23,7 @@ export class ReadAvailableSlotsForService {
 
   constructor(
     private teamMemberRepository: TeamMemberRepository,
-    private dayWorkingHoursRepository: DayOfWeekWorkHoursRepository,
+    private dayOfWeekWorkHoursRepository: DayOfWeekWorkHoursRepository,
     private appointmentRepository: AppointmentRepository,
     private serviceRepository: ServiceRepository,
   ) {}
@@ -29,11 +31,11 @@ export class ReadAvailableSlotsForService {
   async handle(req: IReadAvailableSlotsForServiceReq) {
     const service = await this.serviceRepository.findOrThrow(req.serviceId)
     const teamMembers = await this.teamMemberRepository.findAllActiveByServiceId(req.serviceId)
-    const daysWorkingHours = await this.dayWorkingHoursRepository.findWeeklyConfig()
+    const daysOfWeekWorkHours = await this.dayOfWeekWorkHoursRepository.findWeeklyConfig()
 
     const workingHoursCalculator = new WorkSlotsCalculator({
       timeZone: this.config.timeZone,
-      weeklyConfig: daysWorkingHours,
+      weeklyConfig: daysOfWeekWorkHours,
     })
 
     const start = new Date()
@@ -52,11 +54,39 @@ export class ReadAvailableSlotsForService {
       appointments,
     )
 
-    return availableSlotsCalculator.calculateSlots({
+    const slots = availableSlotsCalculator.calculateSlots({
       durationMs: service.durationMinutes * 60 * 1000,
       intervalMs: 30 * 60 * 1000,
       bufferAfterMs: 30 * 60 * 1000,
       bufferBeforeMs: 30 * 60 * 1000,
     })
+
+    const formatedSlots = slots.map((x) => {
+      const start = getDatePartsInTimeZone(new Date(x.range.start), this.config.timeZone)
+      const end = getDatePartsInTimeZone(new Date(x.range.end), this.config.timeZone)
+
+      return {
+        teamMemberId: x.teamMemberId,
+        utcOffset: getTimeZoneOffset(this.config.timeZone, new Date(x.range.start)),
+        range: {
+          start: {
+            year: start.year,
+            month: start.month,
+            day: start.day,
+            hour: start.hour,
+            minute: start.minute,
+          },
+          end: {
+            year: end.year,
+            month: end.month,
+            day: end.day,
+            hour: end.hour,
+            minute: end.minute,
+          },
+        },
+      }
+    })
+
+    return formatedSlots
   }
 }

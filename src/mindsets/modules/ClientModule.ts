@@ -58,7 +58,7 @@ export class ClientModule {
   }
 
   @description('read the actual info saved of the client, return null if client not found')
-  async getClientInfo(): Promise<Client | null> {
+  async getCurrentClientInfo(): Promise<Client | null> {
     let clientId = this.chat.getAssociationsByType('Client').at(0)?.id
     let client = clientId ? await this.clientRepository.findOrThrow(clientId) : null
     return client

@@ -1,3 +1,5 @@
+import { getDatePartsInTimeZone } from './getDatePartsInTimeZone'
+import { getTimeZoneOffset } from './getTimeZoneOffset'
 import { ITimeRange } from './ITimeRange'
 
 export type IDayOfWeekWorkSlots = {
@@ -23,30 +25,55 @@ export class WorkSlotsCalculator {
     const ranges: ITimeRange[] = []
 
     let current = new Date(startDate)
-    current.setHours(0, 0, 0, 0)
-
     const end = new Date(endDate)
-    end.setHours(0, 0, 0, 0)
 
     while (current <= end) {
-      const ymd = current.toISOString().slice(0, 10)
+      const tzOffset = getTimeZoneOffset(this.config.timeZone, current)
+      const { year, month, day, hour, minute } = getDatePartsInTimeZone(
+        current,
+        this.config.timeZone,
+      )
+
+      const currentNtz = new Date(Date.UTC(year, month - 1, day, hour, minute))
+      const currentLocal = new Date(year, month - 1, day, hour, minute)
+
+      const ymd = currentNtz.toISOString().slice(0, 10)
+      const dayOfWeek = currentLocal.getDay()
 
       const special = this.config.specialDays?.find((d) => d.date === ymd)
 
       const dayRanges =
         special?.ranges ||
-        this.config.weeklyConfig.find((d) => d.dayOfWeek === current.getDay())?.ranges ||
+        this.config.weeklyConfig.find((d) => d.dayOfWeek === dayOfWeek)?.ranges ||
         []
 
       for (const r of dayRanges) {
-        const startUtc = this.toUtc(current, r.startHour, r.startMinute)
-        const endUtc = this.toUtc(current, r.endHour, r.endMinute)
+        if (r.endHour * 60 + r.endMinute <= hour * 60 + minute) continue
 
-        if (startUtc < endUtc) {
-          ranges.push({ start: startUtc, end: endUtc })
+        const start = Math.max(hour * 60 + minute, r.startHour * 60 + r.startMinute)
+
+        const startHour = Math.floor(start / 60)
+        const startMinute = start % 60
+
+        const startMs =
+          Date.UTC(year, month - 1, day, startHour, startMinute) -
+          tzOffset.hours * 3600 * 1000 -
+          tzOffset.minutes * 60 * 1000
+
+        const endMs =
+          Date.UTC(year, month - 1, day, r.endHour, r.endMinute) -
+          tzOffset.hours * 3600 * 1000 -
+          tzOffset.minutes * 60 * 1000
+
+        if (startMs < endMs) {
+          ranges.push({ start: startMs, end: endMs })
         }
       }
 
+      current.setMilliseconds(0)
+      current.setSeconds(0)
+      current.setMinutes(current.getMinutes() - minute)
+      current.setHours(current.getHours() - hour)
       current.setDate(current.getDate() + 1)
     }
 

@@ -23,9 +23,13 @@ export class AgendaModule {
   @description('Get current time')
   async getCurrentTime() {
     const now = new Date()
+    const offset = now.getTimezoneOffset()
     return {
       now,
-      utcOffset: now.getTimezoneOffset(),
+      utcOffset: {
+        hours: Math.floor(offset / 60),
+        minutes: offset % 60,
+      },
     }
   }
 }
