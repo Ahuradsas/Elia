@@ -1,3 +1,4 @@
+import { IAppointmentAssignation } from '@/domain/calendar'
 import { Entity, IEntityData } from '@wabot-dev/framework'
 
 export type IAppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled'
@@ -5,17 +6,31 @@ export type IAppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancel
 export interface IAppointmentData extends IEntityData {
   clientId: string
   serviceId: string
-  slotId: string
+  teamMemberId: string
+  serviceName: string
   address: string
+  zone: string
   scheduledAt: number
+  scheduledEndAt: number
   status: IAppointmentStatus
   cancelledAt?: number
   completedAt?: number
 }
 
-export class Appointment extends Entity<IAppointmentData> {
+export class Appointment extends Entity<IAppointmentData> implements IAppointmentAssignation {
   get status() {
     return this.data.status
+  }
+
+  get teamMemberId() {
+    return this.data.teamMemberId
+  }
+
+  get range() {
+    return {
+      start: this.data.scheduledAt,
+      end: this.data.scheduledEndAt,
+    }
   }
 
   isPending() {

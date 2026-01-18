@@ -1,13 +1,13 @@
 import { Entity, IEntityData } from '@wabot-dev/framework'
 
-export interface INailServiceData extends IEntityData {
+export interface IServiceData extends IEntityData {
   name: string
   durationMinutes: number
   price: number
   isActive: boolean
 }
 
-export class NailService extends Entity<INailServiceData> {
+export class Service extends Entity<IServiceData> {
   get name() {
     return this.data.name
   }
