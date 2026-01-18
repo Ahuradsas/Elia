@@ -23,6 +23,7 @@ import { ChatController } from './controllers/ChatController'
 
 import { ReadyController } from './controllers/ReadyController'
 import { EliaBusinessId, EliaBusinessTz, EliaPool } from './elia-injection'
+import { resolveYcloudWebhookController } from './channel/ycloud/ycloud-webhook-controller'
 const env = container.resolve(Env)
 
 container.registerInstance(Pool, new Pool({ connectionString: env.requireString('DATABASE_URL') }))
@@ -45,3 +46,5 @@ container.register(EliaPool, {
 
 runRestControllers([ReadyController])
 runChatControllers([ChatController])
+
+resolveYcloudWebhookController('/ycloud/webhook')
