@@ -34,7 +34,10 @@ export class ChatController {
     console.log('***************************')
 
     this.homeSchedulerBot.sendMessage(context.message, (replyMessage) => {
-      context.reply({ ...replyMessage, text: replyMessage.text?.replaceAll('**', '*') })
+      console.log('*********** Response ****************')
+      console.log(replyMessage)
+      console.log('***************************')
+      // context.reply({ ...replyMessage, text: replyMessage.text?.replaceAll('**', '*') })
     })
   }
 
