@@ -4,7 +4,9 @@ import {
   IChatChannel,
   IChatConnection,
   injectable,
+  Logger,
 } from '@wabot-dev/framework'
+import { YCloudApi } from './YCloudApi'
 import { YCloudWhatsAppChatChannelConfig } from './YCloudWhatsAppChatChannelConfig'
 import { listenYCloudWebhook } from './ycloud-webhook-controller'
 
@@ -12,6 +14,8 @@ import { listenYCloudWebhook } from './ycloud-webhook-controller'
 export class YCloudWhatsAppChatChannel implements IChatChannel {
   private listener: null | ((received: IChannelMessage) => void) = null
   private apiKey: string
+  private api: YCloudApi
+  private logger = new Logger('wabot:ycloud-whatsapp-chat-channel')
 
   static channelName = 'YCloudWhatsAppChatChannel'
 
@@ -20,6 +24,7 @@ export class YCloudWhatsAppChatChannel implements IChatChannel {
     private env: Env,
   ) {
     this.apiKey = config.apiKey ?? env.requireString('YCLOUD_API_KEY')
+    this.api = new YCloudApi(this.apiKey)
   }
 
   listen(callback: (received: IChannelMessage) => void): void {
@@ -47,8 +52,23 @@ export class YCloudWhatsAppChatChannel implements IChatChannel {
           message: {
             text: event.whatsappInboundMessage.text?.body,
           },
-          reply: (repplyMessage) => {
-            console.log(repplyMessage)
+          reply: async (repplyMessage) => {
+            if (!repplyMessage.text) {
+              this.logger.warn('Reply message has no text content')
+              return
+            }
+
+            try {
+              const response = await this.api.sendTextMessage(
+                event.whatsappInboundMessage.to,
+                event.whatsappInboundMessage.from,
+                repplyMessage.text,
+              )
+              this.logger.info('Message sent successfully:', response.id)
+            } catch (error) {
+              this.logger.error('Failed to send reply message:', error)
+              throw error
+            }
           },
         })
       } else if (direction === 'outgoing') {
@@ -67,8 +87,23 @@ export class YCloudWhatsAppChatChannel implements IChatChannel {
           message: {
             text: event.whatsappMessage.text?.body,
           },
-          reply: (repplyMessage) => {
-            console.log(repplyMessage)
+          reply: async (repplyMessage) => {
+            if (!repplyMessage.text) {
+              this.logger.warn('Reply message has no text content')
+              return
+            }
+
+            try {
+              const response = await this.api.sendTextMessage(
+                event.whatsappMessage.from,
+                event.whatsappMessage.to,
+                repplyMessage.text,
+              )
+              this.logger.info('Message sent successfully:', response.id)
+            } catch (error) {
+              this.logger.error('Failed to send reply message:', error)
+              throw error
+            }
           },
         })
       }
