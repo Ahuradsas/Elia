@@ -26,6 +26,11 @@ export class ChatController {
       (x) => x.channelName === YCloudWhatsAppChatChannel.channelName,
     )
 
+    console.log('*********** Received ****************')
+    console.log(context.message)
+    console.log(connection)
+    console.log('***************************')
+
     if (!config.isOn && (!connection || !config.testNumbers.includes(connection.id))) return
 
     console.log('*********** Incoming ****************')
@@ -37,7 +42,7 @@ export class ChatController {
       console.log('*********** Response ****************')
       console.log(replyMessage)
       console.log('***************************')
-      // context.reply({ ...replyMessage, text: replyMessage.text?.replaceAll('**', '*') })
+      context.reply({ ...replyMessage, text: replyMessage.text?.replaceAll('**', '*') })
     })
   }
 
