@@ -6,32 +6,44 @@ import {
   RestRequest,
   runRestControllers,
 } from '@wabot-dev/framework'
-import { type IYCloudWhatsAppEvent } from './ycloud-whatsapp-events'
+import { type IYCloudWhatsAppEvent } from './ycloud-webhook-events'
 
-const ycloudWebhooksControllers = new Map<string, Function>()
+export type IYCloudEventListener = (event: IYCloudWhatsAppEvent) => void | Promise<void>
+
+interface IYCloudWebhookControllerPack {
+  listeners: IYCloudEventListener[]
+}
+
+const webhooksControllersPacks = new Map<string, IYCloudWebhookControllerPack>()
 
 class YCloudWebhookReq extends RestRequest {
   @isPresent()
   body!: IYCloudWhatsAppEvent
 }
 
-export function resolveYcloudWebhookController(path: string) {
-  const existing = ycloudWebhooksControllers.get(path)
-  if (existing) return existing
+export function listenYCloudWebhook(path: string, listener: IYCloudEventListener) {
+  const existing = webhooksControllersPacks.get(path)
+  if (existing) {
+    existing.listeners.push(listener)
+    return
+  }
+
+  const pack: IYCloudWebhookControllerPack = {
+    listeners: [listener],
+  }
+
+  webhooksControllersPacks.set(path, pack)
 
   @restController(path)
-  class YcloudWebhookController {
+  class YCloudWebhookController {
     private logger = new Logger('wabot:ycloud-webhook-controller')
 
     @onPost()
-    handleEvent(req: YCloudWebhookReq) {
-      this.logger.debug(JSON.stringify(req.body))
+    async handleEvent(req: YCloudWebhookReq) {
+      this.logger.debug(`received event ${req.body.type}`)
+      await Promise.allSettled(pack.listeners.map((l) => l(req.body)))
     }
   }
 
-  ycloudWebhooksControllers.set(path, YcloudWebhookController)
-
-  runRestControllers([YcloudWebhookController])
-
-  return YcloudWebhookController
+  runRestControllers([YCloudWebhookController])
 }

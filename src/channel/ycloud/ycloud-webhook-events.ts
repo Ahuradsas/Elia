@@ -20,7 +20,7 @@ export interface IYCloudWebhookEvent<T = unknown> {
 // Common Message Context
 // ========================================
 
-export interface IMessageContext {
+export interface IYCloudMessageContext {
   from: string
   id: string
   referred_product?: {
@@ -29,7 +29,7 @@ export interface IMessageContext {
   }
 }
 
-export interface ICustomerProfile {
+export interface IYCloudCustomerProfile {
   name: string
 }
 
@@ -37,39 +37,39 @@ export interface ICustomerProfile {
 // WhatsApp Inbound Message Event
 // ========================================
 
-export interface IWhatsAppInboundMessageEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppInboundMessageEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.inbound_message.received'
-  whatsappInboundMessage: IWhatsAppInboundMessage
+  whatsappInboundMessage: IYCloudWhatsAppInboundMessage
 }
 
-export interface IWhatsAppInboundMessage {
+export interface IYCloudWhatsAppInboundMessage {
   id: string
   wamid: string
   wabaId: string
   from: string
   to: string
   sendTime: string
-  customerProfile: ICustomerProfile
-  type: IWhatsAppMessageType
-  text?: ITextContent
-  image?: IMediaContent
-  video?: IMediaContent
-  audio?: IMediaContent
-  document?: IDocumentContent
-  sticker?: IMediaContent
-  location?: ILocationContent
-  contacts?: IContactContent[]
-  reaction?: IReactionContent
-  button?: IButtonContent
-  interactive?: IInteractiveContent
-  order?: IOrderContent
-  system?: ISystemContent
-  errors?: IMessageError[]
-  referral?: IReferralContent
-  context?: IMessageContext
+  customerProfile: IYCloudCustomerProfile
+  type: IYCloudWhatsAppMessageType
+  text?: IYCloudTextContent
+  image?: IYCloudMediaContent
+  video?: IYCloudMediaContent
+  audio?: IYCloudMediaContent
+  document?: IYCloudDocumentContent
+  sticker?: IYCloudMediaContent
+  location?: IYCloudLocationContent
+  contacts?: IYCloudContactContent[]
+  reaction?: IYCloudReactionContent
+  button?: IYCloudButtonContent
+  interactive?: IYCloudInteractiveContent
+  order?: IYCloudOrderContent
+  system?: IYCloudSystemContent
+  errors?: IYCloudMessageError[]
+  referral?: IYCloudReferralContent
+  context?: IYCloudMessageContext
 }
 
-export type IWhatsAppMessageType =
+export type IYCloudWhatsAppMessageType =
   | 'text'
   | 'image'
   | 'video'
@@ -86,11 +86,11 @@ export type IWhatsAppMessageType =
   | 'unsupported'
   | 'request_welcome'
 
-export interface ITextContent {
+export interface IYCloudTextContent {
   body: string
 }
 
-export interface IMediaContent {
+export interface IYCloudMediaContent {
   link: string
   id: string
   sha256: string
@@ -98,11 +98,11 @@ export interface IMediaContent {
   caption?: string
 }
 
-export interface IDocumentContent extends IMediaContent {
+export interface IYCloudDocumentContent extends IYCloudMediaContent {
   filename?: string
 }
 
-export interface ILocationContent {
+export interface IYCloudLocationContent {
   latitude: number
   longitude: number
   name?: string
@@ -110,7 +110,7 @@ export interface ILocationContent {
   url?: string
 }
 
-export interface IContactContent {
+export interface IYCloudContactContent {
   name: {
     formatted_name: string
     first_name?: string
@@ -119,19 +119,19 @@ export interface IContactContent {
     prefix?: string
     suffix?: string
   }
-  addresses?: IContactAddress[]
+  addresses?: IYCloudContactAddress[]
   birthday?: string
-  emails?: IContactEmail[]
-  phones?: IContactPhone[]
+  emails?: IYCloudContactEmail[]
+  phones?: IYCloudContactPhone[]
   org?: {
     company: string
     department: string
     title: string
   }
-  urls?: IContactUrl[]
+  urls?: IYCloudContactUrl[]
 }
 
-export interface IContactAddress {
+export interface IYCloudContactAddress {
   street: string
   city: string
   state: string
@@ -141,33 +141,33 @@ export interface IContactAddress {
   type: 'HOME' | 'WORK'
 }
 
-export interface IContactEmail {
+export interface IYCloudContactEmail {
   email: string
   type: string
 }
 
-export interface IContactPhone {
+export interface IYCloudContactPhone {
   phone: string
   wa_id: string
   type: string
 }
 
-export interface IContactUrl {
+export interface IYCloudContactUrl {
   url: string
   type: string
 }
 
-export interface IReactionContent {
+export interface IYCloudReactionContent {
   message_id: string
   emoji?: string
 }
 
-export interface IButtonContent {
+export interface IYCloudButtonContent {
   payload: string
   text: string
 }
 
-export interface IInteractiveContent {
+export interface IYCloudInteractiveContent {
   type: 'list_reply' | 'button_reply' | 'nfm_reply'
   list_reply?: {
     id: string
@@ -185,31 +185,31 @@ export interface IInteractiveContent {
   }
 }
 
-export interface IOrderContent {
+export interface IYCloudOrderContent {
   catalog_id: string
-  product_items: IProductItem[]
+  product_items: IYCloudProductItem[]
   text?: string
 }
 
-export interface IProductItem {
+export interface IYCloudProductItem {
   product_retailer_id: string
   quantity: string | number
   item_price: string | number
   currency: string
 }
 
-export interface ISystemContent {
+export interface IYCloudSystemContent {
   type: 'user_changed_number'
   body: string
   wa_id: string
 }
 
-export interface IMessageError {
+export interface IYCloudMessageError {
   code: string
   title: string
 }
 
-export interface IReferralContent {
+export interface IYCloudReferralContent {
   source_url: string
   source_type: 'ad'
   source_id: string
@@ -223,21 +223,21 @@ export interface IReferralContent {
 // WhatsApp Message Updated Event
 // ========================================
 
-export interface IWhatsAppMessageUpdatedEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppMessageUpdatedEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.message.updated'
-  whatsappMessage: IWhatsAppMessage
+  whatsappMessage: IYCloudWhatsAppMessage
 }
 
-export interface IWhatsAppMessage {
+export interface IYCloudWhatsAppMessage {
   id: string
   wamid: string
   wabaId: string
   from: string
   to: string
-  status: IMessageStatus
+  status: IYCloudMessageStatus
   type: string
-  text?: ITextContent
-  template?: ITemplateContent
+  text?: IYCloudTextContent
+  template?: IYCloudTemplateContent
   bizType: 'whatsapp'
   pricingCategory?: string
   pricingModel?: 'PMP'
@@ -245,7 +245,7 @@ export interface IWhatsAppMessage {
   totalPrice?: string
   currency?: 'USD'
   regionCode?: string
-  conversation?: IConversationInfo
+  conversation?: IYCloudConversationInfo
   externalId?: string
   createTime: string
   sendTime?: string
@@ -253,24 +253,24 @@ export interface IWhatsAppMessage {
   readTime?: string
   errorCode?: string
   errorMessage?: string
-  whatsappApiError?: IWhatsAppApiError
+  whatsappApiError?: IYCloudWhatsAppApiError
 }
 
-export type IMessageStatus =
+export type IYCloudMessageStatus =
   | 'accepted'
   | 'sent'
   | 'delivered'
   | 'read'
   | 'failed'
 
-export interface ITemplateContent {
+export interface IYCloudTemplateContent {
   name: string
   language: {
     code: string
   }
 }
 
-export interface IConversationInfo {
+export interface IYCloudConversationInfo {
   id: string
   origin: {
     type: string
@@ -278,7 +278,7 @@ export interface IConversationInfo {
   expiration_timestamp?: string
 }
 
-export interface IWhatsAppApiError {
+export interface IYCloudWhatsAppApiError {
   message: string
   type: string
   code: number
@@ -292,23 +292,23 @@ export interface IWhatsAppApiError {
 // WhatsApp Phone Number Events
 // ========================================
 
-export interface IWhatsAppPhoneNumberDeletedEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppPhoneNumberDeletedEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.phone_number.deleted'
-  whatsappPhoneNumber: IWhatsAppPhoneNumberDeleted
+  whatsappPhoneNumber: IYCloudWhatsAppPhoneNumberDeleted
 }
 
-export interface IWhatsAppPhoneNumberDeleted {
+export interface IYCloudWhatsAppPhoneNumberDeleted {
   phoneNumber: string
   displayPhoneNumber: string
   wabaId: string
 }
 
-export interface IWhatsAppPhoneNumberNameUpdatedEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppPhoneNumberNameUpdatedEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.phone_number.name_updated'
-  whatsappPhoneNumber: IWhatsAppPhoneNumberNameUpdate
+  whatsappPhoneNumber: IYCloudWhatsAppPhoneNumberNameUpdate
 }
 
-export interface IWhatsAppPhoneNumberNameUpdate {
+export interface IYCloudWhatsAppPhoneNumberNameUpdate {
   phoneNumber: string
   displayPhoneNumber: string
   wabaId: string
@@ -318,12 +318,12 @@ export interface IWhatsAppPhoneNumberNameUpdate {
   status: string
 }
 
-export interface IWhatsAppPhoneNumberQualityUpdatedEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppPhoneNumberQualityUpdatedEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.phone_number.quality_updated'
-  whatsappPhoneNumber: IWhatsAppPhoneNumberQualityUpdate
+  whatsappPhoneNumber: IYCloudWhatsAppPhoneNumberQualityUpdate
 }
 
-export interface IWhatsAppPhoneNumberQualityUpdate {
+export interface IYCloudWhatsAppPhoneNumberQualityUpdate {
   phoneNumber: string
   displayPhoneNumber: string
   wabaId: string
@@ -338,12 +338,12 @@ export interface IWhatsAppPhoneNumberQualityUpdate {
 // WhatsApp Template Events
 // ========================================
 
-export interface IWhatsAppTemplateReviewedEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppTemplateReviewedEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.template.reviewed'
-  whatsappTemplate: IWhatsAppTemplateReviewed
+  whatsappTemplate: IYCloudWhatsAppTemplateReviewed
 }
 
-export interface IWhatsAppTemplateReviewed {
+export interface IYCloudWhatsAppTemplateReviewed {
   wabaId: string
   name: string
   language: string
@@ -355,12 +355,12 @@ export interface IWhatsAppTemplateReviewed {
   statusUpdateEvent: string
 }
 
-export interface IWhatsAppTemplateCategoryUpdatedEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppTemplateCategoryUpdatedEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.template.category_updated'
-  whatsappTemplate: IWhatsAppTemplateCategoryUpdate
+  whatsappTemplate: IYCloudWhatsAppTemplateCategoryUpdate
 }
 
-export interface IWhatsAppTemplateCategoryUpdate {
+export interface IYCloudWhatsAppTemplateCategoryUpdate {
   wabaId: string
   name: string
   language: string
@@ -368,12 +368,12 @@ export interface IWhatsAppTemplateCategoryUpdate {
   previousCategory: string
 }
 
-export interface IWhatsAppTemplateQualityUpdatedEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppTemplateQualityUpdatedEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.template.quality_updated'
-  whatsappTemplate: IWhatsAppTemplateQualityUpdate
+  whatsappTemplate: IYCloudWhatsAppTemplateQualityUpdate
 }
 
-export interface IWhatsAppTemplateQualityUpdate {
+export interface IYCloudWhatsAppTemplateQualityUpdate {
   wabaId: string
   name: string
   language: string
@@ -386,19 +386,19 @@ export interface IWhatsAppTemplateQualityUpdate {
 // WhatsApp Payment Events
 // ========================================
 
-export interface IWhatsAppPaymentUpdatedEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppPaymentUpdatedEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.payment.updated'
-  whatsappPayment: IWhatsAppPayment
+  whatsappPayment: IYCloudWhatsAppPayment
 }
 
-export interface IWhatsAppPayment {
+export interface IYCloudWhatsAppPayment {
   wabaId: string
   referenceId: string
   status: 'captured' | 'pending'
-  transactions: IPaymentTransaction[]
+  transactions: IYCloudPaymentTransaction[]
 }
 
-export interface IPaymentTransaction {
+export interface IYCloudPaymentTransaction {
   id: string
   type: string
   status: string
@@ -418,33 +418,33 @@ export interface IPaymentTransaction {
 // WhatsApp Business Account Events
 // ========================================
 
-export interface IWhatsAppBusinessAccountDeletedEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppBusinessAccountDeletedEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.business_account.deleted'
-  whatsappBusinessAccount: IWhatsAppBusinessAccountDeleted
+  whatsappBusinessAccount: IYCloudWhatsAppBusinessAccountDeleted
 }
 
-export interface IWhatsAppBusinessAccountDeleted {
+export interface IYCloudWhatsAppBusinessAccountDeleted {
   id: string
   name: string
 }
 
-export interface IWhatsAppBusinessAccountUpdatedEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppBusinessAccountUpdatedEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.business_account.updated'
-  whatsappBusinessAccount: IWhatsAppBusinessAccountUpdate
+  whatsappBusinessAccount: IYCloudWhatsAppBusinessAccountUpdate
 }
 
-export interface IWhatsAppBusinessAccountUpdate {
+export interface IYCloudWhatsAppBusinessAccountUpdate {
   id: string
   name: string
   accountReviewStatus: string
   updateEvent: string
-  restrictions?: IAccountRestriction[]
+  restrictions?: IYCloudAccountRestriction[]
   banState?: string
   banDate?: string
   violationType?: string
 }
 
-export interface IAccountRestriction {
+export interface IYCloudAccountRestriction {
   restrictionType: string
   restrictionInfo: string
 }
@@ -453,40 +453,40 @@ export interface IAccountRestriction {
 // WhatsApp Business App Events
 // ========================================
 
-export interface IWhatsAppSmbHistoryEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppSmbHistoryEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.smb.history'
-  whatsappInboundMessage?: IWhatsAppInboundMessage
-  whatsappMessage?: IWhatsAppMessage
+  whatsappInboundMessage?: IYCloudWhatsAppInboundMessage
+  whatsappMessage?: IYCloudWhatsAppMessage
 }
 
-export interface IWhatsAppSmbMessageEchoesEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppSmbMessageEchoesEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.smb.message.echoes'
-  whatsappMessage: IWhatsAppMessage
+  whatsappMessage: IYCloudWhatsAppMessage
 }
 
-export interface IWhatsAppSmbAppStateSyncEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppSmbAppStateSyncEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.smb.app.state.sync'
-  whatsappSmbAppStateSync: IWhatsAppSmbAppStateSync
+  whatsappSmbAppStateSync: IYCloudWhatsAppSmbAppStateSync
 }
 
-export interface IWhatsAppSmbAppStateSync {
+export interface IYCloudWhatsAppSmbAppStateSync {
   wabaId: string
   phoneNumber: string
-  stateSync: IStateSync[]
+  stateSync: IYCloudStateSync[]
 }
 
-export interface IStateSync {
+export interface IYCloudStateSync {
   contact: string
   action: string
   timestamp: string
 }
 
-export interface IWhatsAppUserPreferencesEvent extends IYCloudWebhookEvent<never> {
+export interface IYCloudWhatsAppUserPreferencesEvent extends IYCloudWebhookEvent<never> {
   type: 'whatsapp.user.preferences'
-  whatsappUserPreference: IWhatsAppUserPreference
+  whatsappUserPreference: IYCloudWhatsAppUserPreference
 }
 
-export interface IWhatsAppUserPreference {
+export interface IYCloudWhatsAppUserPreference {
   wabaId: string
   businessPhoneNumber: string
   businessPhoneId: string
@@ -503,18 +503,18 @@ export interface IWhatsAppUserPreference {
 // ========================================
 
 export type IYCloudWhatsAppEvent =
-  | IWhatsAppInboundMessageEvent
-  | IWhatsAppMessageUpdatedEvent
-  | IWhatsAppPhoneNumberDeletedEvent
-  | IWhatsAppPhoneNumberNameUpdatedEvent
-  | IWhatsAppPhoneNumberQualityUpdatedEvent
-  | IWhatsAppTemplateReviewedEvent
-  | IWhatsAppTemplateCategoryUpdatedEvent
-  | IWhatsAppTemplateQualityUpdatedEvent
-  | IWhatsAppPaymentUpdatedEvent
-  | IWhatsAppBusinessAccountDeletedEvent
-  | IWhatsAppBusinessAccountUpdatedEvent
-  | IWhatsAppSmbHistoryEvent
-  | IWhatsAppSmbMessageEchoesEvent
-  | IWhatsAppSmbAppStateSyncEvent
-  | IWhatsAppUserPreferencesEvent
+  | IYCloudWhatsAppInboundMessageEvent
+  | IYCloudWhatsAppMessageUpdatedEvent
+  | IYCloudWhatsAppPhoneNumberDeletedEvent
+  | IYCloudWhatsAppPhoneNumberNameUpdatedEvent
+  | IYCloudWhatsAppPhoneNumberQualityUpdatedEvent
+  | IYCloudWhatsAppTemplateReviewedEvent
+  | IYCloudWhatsAppTemplateCategoryUpdatedEvent
+  | IYCloudWhatsAppTemplateQualityUpdatedEvent
+  | IYCloudWhatsAppPaymentUpdatedEvent
+  | IYCloudWhatsAppBusinessAccountDeletedEvent
+  | IYCloudWhatsAppBusinessAccountUpdatedEvent
+  | IYCloudWhatsAppSmbHistoryEvent
+  | IYCloudWhatsAppSmbMessageEchoesEvent
+  | IYCloudWhatsAppSmbAppStateSyncEvent
+  | IYCloudWhatsAppUserPreferencesEvent
