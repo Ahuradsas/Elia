@@ -33,7 +33,8 @@ export class YCloudWhatsAppChatChannel implements IChatChannel {
 
       if (direction === 'incoming') {
         if (event.type !== 'whatsapp.inbound_message.received') return
-        if (event.whatsappInboundMessage.to !== this.config.number) return
+        if (this.config.number != null && event.whatsappInboundMessage.to !== this.config.number)
+          return
 
         const chatConnection: IChatConnection = {
           id: event.whatsappInboundMessage.from,
@@ -53,7 +54,7 @@ export class YCloudWhatsAppChatChannel implements IChatChannel {
       } else if (direction === 'outgoing') {
         if (event.type !== 'whatsapp.message.updated') return
         if (event.whatsappMessage.status !== 'delivered') return
-        if (event.whatsappMessage.from !== this.config.number) return
+        if (this.config.number != null && event.whatsappMessage.from !== this.config.number) return
 
         const chatConnection: IChatConnection = {
           id: event.whatsappMessage.to,

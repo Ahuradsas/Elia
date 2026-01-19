@@ -3,16 +3,21 @@ import { ClientModule } from './modules/ClientModule'
 import { NailServiceModule } from './modules/NailServiceModule'
 import { AgendaModule } from './modules/AgendaModule'
 import { AppointmentModule } from './modules/AppointmentModule'
+import { BotConfigRepository } from '@/repository/BotConfigRepository'
+import { BotConfig } from '@/entity/BotConfig'
 
 @mindset({
   modules: [ClientModule, NailServiceModule, AgendaModule, AppointmentModule],
 })
 export class NailHomeSchedulerMindset implements IMindset {
+  constructor(private botConfigRepository: BotConfigRepository) {}
+
   async identity(): Promise<IMindsetIdentity> {
+    const config = await this.config()
     return {
-      name: 'Agendador de Edglam',
-      language: 'Spanish',
-      personality: 'warm, friendly, efficient',
+      name: config.name,
+      language: config.language,
+      personality: config.personality,
     }
   }
 
@@ -38,14 +43,17 @@ export class NailHomeSchedulerMindset implements IMindset {
   }
 
   async limits(): Promise<string> {
-    return `
+    const config = await this.config()
+
+    return (
+      `
       No debes inventar disponibilidad ni confirmar citas sin registrarlas en la agenda.
 
       No puedes asumir datos de la clienta si no han sido previamente registrados.
 
       No debes salir del contexto del agendamiento de servicios
-      de uñas a domicilio de Edglam.
-    `
+    ` + config.limits
+    )
   }
 
   async llms(): Promise<IMindsetLlm[]> {
@@ -59,7 +67,7 @@ export class NailHomeSchedulerMindset implements IMindset {
 
   async workflow(): Promise<string> {
     return `
-      Te escribe una clienta interesada en los servicios de uñas a domicilio de Edglam.
+      Te escribe una clienta interesada en los servicios de uñas a domicilio.
 
       Tu misión principal es lograr que la cita quede correctamente agendada en la agenda.
 
@@ -103,5 +111,10 @@ export class NailHomeSchedulerMindset implements IMindset {
       La clienta debe terminar la conversación con su cita confirmada
       y una experiencia positiva con Edglam.
     `
+  }
+
+  private async config(): Promise<BotConfig> {
+    const config = await this.botConfigRepository.findOrThrow()
+    return config
   }
 }

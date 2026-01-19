@@ -2,7 +2,7 @@ import { IYCloudWhatsAppChatChannelConfig } from './IYCloudWhatsAppChatChannelCo
 
 export class YCloudWhatsAppChatChannelConfig implements IYCloudWhatsAppChatChannelConfig {
   constructor(
-    public number: string,
+    public number: string | undefined,
     public direction: 'incoming' | 'outgoing',
     public webhook: string | undefined,
     public apiKey: string | undefined,

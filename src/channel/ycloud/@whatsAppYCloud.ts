@@ -3,7 +3,7 @@ import { IYCloudWhatsAppChatChannelConfig } from './IYCloudWhatsAppChatChannelCo
 import { YCloudWhatsAppChatChannel } from './YCloudWhatsAppChatChannel'
 import { YCloudWhatsAppChatChannelConfig } from './YCloudWhatsAppChatChannelConfig'
 
-export function whatsAppByYCloud(config: IYCloudWhatsAppChatChannelConfig | string) {
+export function whatsAppByYCloud(config?: IYCloudWhatsAppChatChannelConfig | string) {
   return function (target: object, propertyKey: string | symbol) {
     const store = container.resolve(ControllerMetadataStore)
     store.saveChannelMetadata({
@@ -14,10 +14,10 @@ export function whatsAppByYCloud(config: IYCloudWhatsAppChatChannelConfig | stri
         typeof config === 'string'
           ? new YCloudWhatsAppChatChannelConfig(config, 'incoming', undefined, undefined)
           : new YCloudWhatsAppChatChannelConfig(
-              config.number,
-              config.direction ?? 'incoming',
-              config.webhook,
-              config.apiKey,
+              config?.number,
+              config?.direction ?? 'incoming',
+              config?.webhook,
+              config?.apiKey,
             ),
     })
   }

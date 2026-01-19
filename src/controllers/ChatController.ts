@@ -1,27 +1,44 @@
-import { whatsAppByYCloud } from '@/channel'
+import { whatsAppByYCloud, YCloudWhatsAppChatChannel } from '@/channel'
 import { NailHomeSchedulerMindset } from '@/mindsets/NailHomeSchedulerMindset'
-import { chatBot, ChatBot, chatController, cmd, type IReceivedMessage } from '@wabot-dev/framework'
+import { BotConfigRepository } from '@/repository/BotConfigRepository'
+import {
+  Chat,
+  chatBot,
+  ChatBot,
+  chatController,
+  cmd,
+  type IReceivedMessage,
+} from '@wabot-dev/framework'
 
 @chatController()
 export class ChatController {
-  constructor(@chatBot(NailHomeSchedulerMindset) private homeSchedulerBot: ChatBot) {}
+  constructor(
+    @chatBot(NailHomeSchedulerMindset) private homeSchedulerBot: ChatBot,
+    private botConfigRepository: BotConfigRepository,
+    private chat: Chat,
+  ) {}
 
   @cmd()
-  //@whatsApp('573134336124')
-  @whatsAppByYCloud('+573018724155')
-  onMessage(context: IReceivedMessage) {
-    console.log('********* Incoming ******************')
+  @whatsAppByYCloud()
+  async onMessage(context: IReceivedMessage) {
+    const config = await this.botConfigRepository.findOrThrow()
+    const connection = this.chat.connections.find(
+      (x) => x.channelName === YCloudWhatsAppChatChannel.channelName,
+    )
+
+    if (!config.isOn && (!connection || !config.testNumbers.includes(connection.id))) return
+
+    console.log('*********** Incoming ****************')
     console.log(context.message)
+    console.log(connection)
     console.log('***************************')
+
     this.homeSchedulerBot.sendMessage(context.message, (replyMessage) => {
-      //context.reply({...replyMessage, text: replyMessage.text?.replaceAll('**', '*')})
-      console.log('********* Reply ******************')
-      console.log(replyMessage)
-      console.log('***************************')
+      context.reply({ ...replyMessage, text: replyMessage.text?.replaceAll('**', '*') })
     })
   }
 
-  @whatsAppByYCloud({ number: '+573018724155', direction: 'outgoing' })
+  @whatsAppByYCloud({ direction: 'outgoing' })
   onOutgoingMessage(context: IReceivedMessage) {
     console.log('*********** OutGoing ****************')
     console.log(context.message)
