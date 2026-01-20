@@ -1,15 +1,16 @@
 import { Entity, IEntityData } from '@wabot-dev/framework'
-import { IDayOfWeekWorkSlots } from '@/domain/calendar'
 
-export interface IDayOfWeekWorkHoursData extends IEntityData {
+export interface ITeamMemberWorkingHoursData extends IEntityData {
+  teamMemberId: string
   dayOfWeek: number
   ranges: { startHour: number; startMinute: number; endHour: number; endMinute: number }[]
 }
 
-export class DayOfWeekWorkHours
-  extends Entity<IDayOfWeekWorkHoursData>
-  implements IDayOfWeekWorkSlots
-{
+export class TeamMemberWorkingHours extends Entity<ITeamMemberWorkingHoursData> {
+  get teamMemberId() {
+    return this.data.teamMemberId
+  }
+
   get dayOfWeek() {
     return this.data.dayOfWeek
   }

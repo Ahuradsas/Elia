@@ -4,7 +4,7 @@ import { getDatePartsInTimeZone } from '@/domain/calendar/getDatePartsInTimeZone
 import { getTimeZoneOffset } from '@/domain/calendar/getTimeZoneOffset'
 import { WorkSlotsCalculator } from '@/domain/calendar/WorkSlotsCalculator'
 import { AppointmentRepository } from '@/repository/AppointmentRepository'
-import { DayOfWeekWorkHoursRepository } from '@/repository/DayOfWeekWorkHoursRepository'
+import { TeamMemberWorkingHoursRepository } from '@/repository/TeamMemberWorkHoursRepository'
 import { ServiceRepository } from '@/repository/ServiceRepository'
 import { TeamMemberRepository } from '@/repository/TeamMemberRepository'
 import { singleton } from '@wabot-dev/framework'
@@ -23,30 +23,30 @@ export class ReadAvailableSlotsForService {
 
   constructor(
     private teamMemberRepository: TeamMemberRepository,
-    private dayOfWeekWorkHoursRepository: DayOfWeekWorkHoursRepository,
+    private teamMemberWorkingHoursRepository: TeamMemberWorkingHoursRepository,
     private appointmentRepository: AppointmentRepository,
     private serviceRepository: ServiceRepository,
   ) {}
 
   async handle(req: IReadAvailableSlotsForServiceReq) {
-    const service = await this.serviceRepository.findOrThrow(req.serviceId)
-    const teamMembers = await this.teamMemberRepository.findAllActiveByServiceId(req.serviceId)
-    const daysOfWeekWorkHours = await this.dayOfWeekWorkHoursRepository.findWeeklyConfig()
-
-    const workingHoursCalculator = new WorkSlotsCalculator({
-      timeZone: this.config.timeZone,
-      weeklyConfig: daysOfWeekWorkHours,
-    })
+    const timeZone = this.config.timeZone
 
     const start = new Date()
-    const end = addCompleteDays(start, this.config.maxFutureDays, this.config.timeZone)
+    const end = addCompleteDays(start, this.config.maxFutureDays, timeZone)
 
-    const workingHoursRanges = workingHoursCalculator.calculate(start, end)
     const appointments = await this.appointmentRepository.findOverlapping(start, end)
+    const service = await this.serviceRepository.findOrThrow(req.serviceId)
+    const teamMembers = await this.teamMemberRepository.findAllActiveByServiceId(req.serviceId)
+    const teamMembersWorkingHours = await this.teamMemberWorkingHoursRepository.findByTeamMemberIds(
+      teamMembers.map((x) => x.id),
+    )
 
     const teamMembersWorkSlots = teamMembers.map((tm) => ({
       teamMemberId: tm.id,
-      ranges: workingHoursRanges,
+      ranges: new WorkSlotsCalculator({
+        timeZone,
+        weeklyConfig: teamMembersWorkingHours.filter((x) => x.teamMemberId == tm.id),
+      }).calculate(start, end),
     }))
 
     const availableSlotsCalculator = new AvailableSlotsCalculator(
