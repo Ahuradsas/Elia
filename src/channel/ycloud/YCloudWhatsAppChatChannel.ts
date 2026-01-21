@@ -12,7 +12,7 @@ import { listenYCloudWebhook } from './ycloud-webhook-controller'
 
 @injectable()
 export class YCloudWhatsAppChatChannel implements IChatChannel {
-  private listener: null | ((received: IChannelMessage) => void) = null
+  private listener: null | ((received: IChannelMessage) => Promise<void>) = null
   private apiKey: string
   private api: YCloudApi
   private logger = new Logger('wabot:ycloud-whatsapp-chat-channel')
@@ -27,12 +27,12 @@ export class YCloudWhatsAppChatChannel implements IChatChannel {
     this.api = new YCloudApi(this.apiKey)
   }
 
-  listen(callback: (received: IChannelMessage) => void): void {
+  listen(callback: (received: IChannelMessage) => Promise<void>): void {
     this.listener = callback
   }
 
   connect(): void {
-    listenYCloudWebhook(this.config.webhook ?? '/ycloud/webhook', (event) => {
+    listenYCloudWebhook(this.config.webhook ?? '/ycloud/webhook', async (event) => {
       if (!this.listener) return
       const direction = this.config.direction ?? 'incoming'
 
@@ -47,7 +47,7 @@ export class YCloudWhatsAppChatChannel implements IChatChannel {
           chatType: 'PRIVATE',
         }
 
-        this.listener({
+        await this.listener({
           chatConnection,
           message: {
             text: event.whatsappInboundMessage.text?.body,
@@ -65,6 +65,7 @@ export class YCloudWhatsAppChatChannel implements IChatChannel {
                 repplyMessage.text,
               )
               this.logger.info('Message sent successfully:', response.id)
+              if (response.wamid) return { wbmid: response.wamid }
             } catch (error) {
               this.logger.error('Failed to send reply message:', error)
               throw error
@@ -100,6 +101,7 @@ export class YCloudWhatsAppChatChannel implements IChatChannel {
                 repplyMessage.text,
               )
               this.logger.info('Message sent successfully:', response.id)
+              if (response.wamid) return { wbmid: response.wamid }
             } catch (error) {
               this.logger.error('Failed to send reply message:', error)
               throw error

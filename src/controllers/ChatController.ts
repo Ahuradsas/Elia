@@ -22,27 +22,15 @@ export class ChatController {
   @whatsAppByYCloud()
   async onMessage(context: IReceivedMessage) {
     const config = await this.botConfigRepository.findOrThrow()
-    const connection = this.chat.connections.find(
-      (x) => x.channelName === YCloudWhatsAppChatChannel.channelName,
-    )
-
-    console.log('*********** Received ****************')
-    console.log(context.message)
-    console.log(connection)
-    console.log('***************************')
+    const connection = this.chat.getConnectionByChannel(YCloudWhatsAppChatChannel.channelName)
 
     if (!config.isOn && (!connection || !config.testNumbers.includes(connection.id))) return
 
-    console.log('*********** Incoming ****************')
-    console.log(context.message)
-    console.log(connection)
-    console.log('***************************')
-
-    this.homeSchedulerBot.sendMessage(context.message, (replyMessage) => {
-      console.log('*********** Response ****************')
-      console.log(replyMessage)
-      console.log('***************************')
-      context.reply({ ...replyMessage, text: replyMessage.text?.replaceAll('**', '*') })
+    await this.homeSchedulerBot.sendMessage(context.message, async (replyMessage) => {
+      const replyMetadata = await context.reply({
+        ...replyMessage,
+        text: replyMessage.text?.replaceAll('**', '*'),
+      })
     })
   }
 
