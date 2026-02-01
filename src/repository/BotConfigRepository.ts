@@ -53,7 +53,12 @@ export class BotConfigRepository {
             limits: x.limits,
             context: x.context,
             isOn: false, // x.is_active,
-            testNumbers: ['+573134336124'],
+            testNumbers: [
+              '+573134336124', 
+              '+573003410949', 
+              '+573145063381', 
+              '+573001258147',
+            ],
           }),
       )
     })
