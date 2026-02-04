@@ -136,6 +136,8 @@ export class AppointmentRepository {
           clientId: x.client_id,
           serviceId: x.service_id,
           serviceName: x.service_name,
+          servicePrice: x.total_price,
+          notes: x.notes,
           address: x.direction,
           scheduledAt: scheduledAt,
           scheduledEndAt: scheduledEndAt,

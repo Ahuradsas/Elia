@@ -52,7 +52,7 @@ export class BotConfigRepository {
             personality: x.personality,
             limits: x.limits,
             context: x.context,
-            isOn: false, // x.is_active,
+            isOn: x.is_active,
             testNumbers: [
               '+573134336124', 
               '+573003410949', 
