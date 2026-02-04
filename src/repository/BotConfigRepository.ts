@@ -71,7 +71,7 @@ export class BotConfigRepository {
             language: x.language,
             personality: x.personality,
             limits: x.limits,
-            context: x.context,
+            context: x.context ?? '',
             isOn: x.is_active,
             testNumbers,
           }),
