@@ -26,6 +26,10 @@ export class ChatController {
 
     if (!config.isOn && (!connection || !config.testNumbers.includes(connection.id))) return
 
+    if(!context.message.text) {
+      context.message.text = '<empty>'
+    }
+
     await this.homeSchedulerBot.sendMessage(context.message, async (replyMessage) => {
       const replyMetadata = await context.reply({
         ...replyMessage,
