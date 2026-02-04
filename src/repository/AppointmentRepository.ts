@@ -10,7 +10,7 @@ import { v4 } from 'uuid'
 export class AppointmentRepository {
   private table = '"public"."appointments"'
   private columns =
-    '"id", "business_id", "client_id",  "service_id", "service_name", "appointment_date", "appointment_time", "appointment_end_time", "direccion", "zona_barrio", "status", "team_member_id"'
+    '"id", "business_id", "client_id", "service_id", "service_name", "total_price", "notes", "appointment_date", "appointment_time", "appointment_end_time", "direccion", "zona_barrio", "status", "team_member_id"'
 
   constructor(
     @inject(EliaPool) private pool: Pool,
@@ -39,7 +39,7 @@ export class AppointmentRepository {
   async create(item: Appointment): Promise<void> {
     const sql = `
       INSERT INTO ${this.table}(${this.columns})
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
     `
     const data = item['data']
     data.id = v4()
@@ -62,6 +62,8 @@ export class AppointmentRepository {
       data.clientId,
       data.serviceId,
       data.serviceName,
+      data.servicePrice,
+      data.notes,
       `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`,
       `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
       `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`,
