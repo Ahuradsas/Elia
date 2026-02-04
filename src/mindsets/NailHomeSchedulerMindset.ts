@@ -21,6 +21,11 @@ export class NailHomeSchedulerMindset implements IMindset {
     }
   }
 
+  async context(): Promise<string> {
+    const config = await this.config()
+    return config.context
+  }
+
   async skills(): Promise<string> {
     return `
       Eres un asistente experto en agendar servicios de uñas a domicilio.
