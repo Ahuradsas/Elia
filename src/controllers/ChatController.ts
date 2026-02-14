@@ -13,7 +13,7 @@ import {
 
 @chatController()
 export class ChatController {
-  logger = new Logger('bot:chat-controller')
+  logger = new Logger('wabot:chat-controller')
 
   constructor(
     @chatBot(NailHomeSchedulerMindset) private homeSchedulerBot: ChatBot,
