@@ -35,9 +35,6 @@ container.registerType(ChatRepository, PgChatRepository)
 container.registerType(JobRepository, PgJobRepository)
 container.registerType(CronJobRepository, PgCronJobRepository)
 
-container.registerType(WhatsAppReceiver, WhatsAppReceiverByWabotProxy)
-container.registerType(WhatsAppSender, WhatsAppSenderByWabotProxy)
-
 container.register(EliaBusinessId, { useValue: env.requireString('ELIA_BUSINESS_ID') })
 container.register(EliaBusinessTz, { useValue: env.requireString('ELIA_BUSINESS_TZ') })
 container.register(EliaPool, {

@@ -1,3 +1,4 @@
+import { YCloudWhatsAppChatChannel } from '@/channel'
 import { Client } from '@/entity/Client'
 import { ClientRepository } from '@/repository/ClientRepository'
 import {
@@ -66,7 +67,7 @@ export class ClientModule {
 
   @description('read the phone of user')
   async getUserPhone(): Promise<string | null> {
-    const whatsApp = this.chat.connections.find((x) => x.channelName === 'WhatsAppChannel')?.id
+    const whatsApp = this.chat.connections.find((x) => x.channelName === YCloudWhatsAppChatChannel.channelName)?.id
     return whatsApp ?? null
   }
 }

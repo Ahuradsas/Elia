@@ -7,24 +7,30 @@ import {
   ChatBot,
   chatController,
   cmd,
+  Logger,
   type IReceivedMessage,
 } from '@wabot-dev/framework'
 
 @chatController()
 export class ChatController {
+  logger = new Logger('bot:chat-controller')
+
   constructor(
     @chatBot(NailHomeSchedulerMindset) private homeSchedulerBot: ChatBot,
     private botConfigRepository: BotConfigRepository,
     private chat: Chat,
   ) {}
 
-  @cmd()
+  
   @whatsAppByYCloud()
   async onMessage(context: IReceivedMessage) {
     const config = await this.botConfigRepository.findOrThrow()
     const connection = this.chat.getConnectionByChannel(YCloudWhatsAppChatChannel.channelName)
 
-    if (!config.isOn && (!connection || !config.testNumbers.includes(connection.id))) return
+    if (!config.isOn && (!connection || !config.testNumbers.includes(connection.id))) {
+      this.logger.warn(`ignored message: connection='${JSON.stringify(connection ?? null)}' testNumbers='${JSON.stringify(config.testNumbers)}'`)
+      return
+    }
 
     if(!context.message.text) {
       context.message.text = '<empty>'
@@ -32,6 +38,16 @@ export class ChatController {
 
     await this.homeSchedulerBot.sendMessage(context.message, async (replyMessage) => {
       const replyMetadata = await context.reply({
+        ...replyMessage,
+        text: replyMessage.text?.replaceAll('**', '*'),
+      })
+    })
+  }
+
+  @cmd()
+  async onCmdMessage(context: IReceivedMessage) {
+    await this.homeSchedulerBot.sendMessage(context.message, async (replyMessage) => {
+      await context.reply({
         ...replyMessage,
         text: replyMessage.text?.replaceAll('**', '*'),
       })

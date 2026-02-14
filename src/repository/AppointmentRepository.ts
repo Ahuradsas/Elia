@@ -153,6 +153,55 @@ export class AppointmentRepository {
     })
   }
 
+  async update(item: Appointment): Promise<void> {
+    const data = item['data']
+    item.validate()
+
+    const { year, month, day, hour, minute } = getDatePartsInTimeZone(
+      new Date(data.scheduledAt),
+      this.tz,
+    )
+
+    const { hour: endHour, minute: endMinute } = getDatePartsInTimeZone(
+      new Date(data.scheduledEndAt),
+      this.tz,
+    )
+
+    const sql = `
+      UPDATE ${this.table}
+      SET
+        "service_id" = $1,
+        "service_name" = $2,
+        "total_price" = $3,
+        "notes" = $4,
+        "appointment_date" = $5,
+        "appointment_time" = $6,
+        "appointment_end_time" = $7,
+        "direccion" = $8,
+        "zona_barrio" = $9,
+        "team_member_id" = $10,
+        "status" = $11
+      WHERE "id" = $12
+        AND "business_id" = $13
+    `
+
+    await this.exec(sql, [
+      data.serviceId,
+      data.serviceName,
+      data.servicePrice,
+      data.notes,
+      `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`,
+      `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+      `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`,
+      data.address,
+      data.zone,
+      data.teamMemberId,
+      data.status,
+      data.id,
+      this.businessId,
+    ])
+  }
+
   private exec(sql: string, vars: any[]): Promise<void> {
     return withPgClient(this.pool, async (client) => {
       await client.query(sql, vars)

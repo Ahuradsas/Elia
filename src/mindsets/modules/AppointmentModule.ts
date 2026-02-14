@@ -47,6 +47,48 @@ export class AppointmentIdReq {
   appointmentId!: string
 }
 
+export class UpdateAppointmentReq {
+  @isString()
+  @description('ID de la cita a actualizar')
+  appointmentId!: string
+
+  @isString()
+  @description('ID del servicio (opcional, solo si cambia)')
+  serviceId?: string
+
+  @isString()
+  @description('Nombre del servicio (opcional, solo si cambia)')
+  serviceName?: string
+
+  @isNumber()
+  @description('Precio del servicio (opcional, solo si cambia)')
+  servicePrice?: number
+
+  @isString()
+  @description('ID del staff responsable del servicio (opcional, solo si cambia)')
+  teamMemberId?: string
+
+  @isString()
+  @description('Dirección donde se realizará el servicio (opcional, solo si cambia)')
+  address?: string
+
+  @isString()
+  @description('Barrio o zona donde se realizará el servicio (opcional, solo si cambia)')
+  zone?: string
+
+  @isString()
+  @description('Apuntes o información adicional para la prestación del servicio (opcional, solo si cambia)')
+  notes?: string
+
+  @isDate()
+  @description('Nueva fecha y hora programada para la cita (opcional, solo si cambia)')
+  scheduledAt?: Date
+
+  @isDate()
+  @description('Nueva fecha y hora de finalización para la cita (opcional, solo si cambia)')
+  scheduledEndAt?: Date
+}
+
 @mindsetModule()
 export class AppointmentModule {
   constructor(
@@ -75,6 +117,27 @@ export class AppointmentModule {
     })
 
     await this.appointmentRepository.create(appointment)
+    return appointment
+  }
+
+  @description('Update an existing appointment. Only provide the fields that need to be changed.')
+  async updateAppointment(req: UpdateAppointmentReq): Promise<Appointment> {
+    const appointment = await this.appointmentRepository.find(req.appointmentId)
+    if (!appointment) throw new Error(`Appointment ${req.appointmentId} not found`)
+
+    const data = appointment['data']
+
+    if (req.serviceId !== undefined) data.serviceId = req.serviceId
+    if (req.serviceName !== undefined) data.serviceName = req.serviceName
+    if (req.servicePrice !== undefined) data.servicePrice = req.servicePrice
+    if (req.teamMemberId !== undefined) data.teamMemberId = req.teamMemberId
+    if (req.address !== undefined) data.address = req.address
+    if (req.zone !== undefined) data.zone = req.zone
+    if (req.notes !== undefined) data.notes = req.notes
+    if (req.scheduledAt !== undefined) data.scheduledAt = req.scheduledAt.getTime()
+    if (req.scheduledEndAt !== undefined) data.scheduledEndAt = req.scheduledEndAt.getTime()
+
+    await this.appointmentRepository.update(appointment)
     return appointment
   }
 
