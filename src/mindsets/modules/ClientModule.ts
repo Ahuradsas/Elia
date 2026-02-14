@@ -67,7 +67,7 @@ export class ClientModule {
 
   @description('read the phone of user')
   async getUserPhone(): Promise<string | null> {
-    const whatsApp = this.chat.connections.find((x) => x.channelName === YCloudWhatsAppChatChannel.channelName)?.id
+    const whatsApp = null // this.chat.connections.find((x) => x.channelName === YCloudWhatsAppChatChannel.channelName)?.id
     return whatsApp ?? null
   }
 }
