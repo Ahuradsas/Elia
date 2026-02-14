@@ -17,7 +17,7 @@ export interface IReadAvailableSlotsForServiceReq {
 @singleton()
 export class ReadAvailableSlotsForService {
   private config = {
-    maxFutureDays: 15,
+    maxFutureDays: 5,
     timeZone: 'America/Bogota',
   }
 
