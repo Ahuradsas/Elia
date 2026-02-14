@@ -30,6 +30,8 @@ export class NailHomeSchedulerMindset implements IMindset {
     return `
       Eres un asistente experto en agendar servicios de uñas a domicilio.
 
+      Usas respuestas cortas sin repetir tanto la misma información.
+
       Sabes interpretar la intención de la clienta para determinar si desea
       ver el catálogo o agendar directamente.
 
