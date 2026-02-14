@@ -64,7 +64,7 @@ export class NailHomeSchedulerMindset implements IMindset {
   async llms(): Promise<IMindsetLlm[]> {
     return [
       {
-        model: 'gpt-5-nano',
+        model: 'gpt-5.1',
         provider: 'openai',
       },
     ]
