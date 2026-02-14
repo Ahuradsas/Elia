@@ -42,11 +42,15 @@ export class ClientModule {
   @description('Create or update client profile with basic info')
   async upsertClient(req: UpdateClientReq): Promise<Client> {
     let clientId = this.chat.getAssociationsByType('Client').at(0)?.id
-    let client = clientId ? await this.clientRepository.findOrThrow(clientId) : null
+    let client = clientId ? await this.clientRepository.find(clientId) : null
 
     if (!client) {
       client = new Client({ phone: req.phone, name: req.name })
       await this.clientRepository.create(client)
+      const removeAssociationIndex = this.chat.associations.findIndex(x => x.type == 'Client')
+      if(removeAssociationIndex >= 0) {
+        this.chat.associations.splice(removeAssociationIndex, 1)
+      }
       this.chat.addAssociation({ type: 'Client', id: client.id })
       await (this.chatRepository as any).update(this.chat)
     }
@@ -67,7 +71,7 @@ export class ClientModule {
 
   @description('read the phone of user')
   async getUserPhone(): Promise<string | null> {
-    const whatsApp = null // this.chat.connections.find((x) => x.channelName === YCloudWhatsAppChatChannel.channelName)?.id
+    const whatsApp = this.chat.connections.find((x) => x.channelName === YCloudWhatsAppChatChannel.channelName)?.id
     return whatsApp ?? null
   }
 }
