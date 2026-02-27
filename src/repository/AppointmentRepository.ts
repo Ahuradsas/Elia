@@ -10,7 +10,7 @@ import { v4 } from 'uuid'
 export class AppointmentRepository {
   private table = '"public"."appointments"'
   private columns =
-    '"id", "business_id", "client_id", "service_id", "service_name", "total_price", "notes", "appointment_date", "appointment_time", "appointment_end_time", "direccion", "zona_barrio", "status", "team_member_id"'
+    '"id", "business_id", "client_id", "service_id", "service_name", "total_price", "notes", "appointment_date", "appointment_time", "appointment_end_time", "direccion", "zona_barrio", "status", "team_member_id", "created_at"'
 
   constructor(
     @inject(EliaPool) private pool: Pool,
@@ -39,7 +39,7 @@ export class AppointmentRepository {
   async create(item: Appointment): Promise<void> {
     const sql = `
       INSERT INTO ${this.table}(${this.columns})
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
     `
     const data = item['data']
     data.id = v4()
@@ -71,18 +71,21 @@ export class AppointmentRepository {
       data.zone,
       data.status,
       data.teamMemberId,
+      new Date(data.createdAt)
     ])
   }
 
-  async findByClientId(clientId: string): Promise<Appointment[]> {
+  async findByClientId(clientId: string, status?: string): Promise<Appointment[]> {
+    const filter = `AND "status" = $3`
     const query = `
       SELECT ${this.columns}
       FROM ${this.table}
       WHERE client_id = $1
         AND business_id = $2
+        ${status ? filter : ''}
       ORDER BY appointment_time DESC
     `
-    return this.query(query, [clientId, this.businessId])
+    return this.query(query, [clientId, this.businessId, status])
   }
 
   async findUpcoming(): Promise<Appointment[]> {
@@ -146,6 +149,7 @@ export class AppointmentRepository {
           zone: x.zona_barrio,
           status: x.status,
           teamMemberId: x.team_member_id,
+          createdAt: x.created_at.getTime(),
         })
 
         return appointment
