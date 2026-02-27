@@ -6,6 +6,10 @@ export class FindSlotsReq {
   @isString()
   @description('id del servicio que se desea agendar')
   serviceId!: string
+
+  @isString()
+  @description('fecha en la que se desea agendar el servicio, formato YYYY-MM-DD')
+  date!: string
 }
 
 @mindsetModule()
@@ -16,6 +20,7 @@ export class AgendaModule {
   async findAvailableSlots(req: FindSlotsReq) {
     const availableSlots = await this.readAvailableSlotsForService.handle({
       serviceId: req.serviceId,
+      date: req.date,
     })
     return availableSlots
   }

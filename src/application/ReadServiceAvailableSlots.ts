@@ -10,7 +10,8 @@ import { TeamMemberRepository } from '@/repository/TeamMemberRepository'
 import { singleton } from '@wabot-dev/framework'
 
 export interface IReadAvailableSlotsForServiceReq {
-  serviceId: string
+  serviceId: string,
+  date: string,
   teamMemberId?: string
 }
 
@@ -31,8 +32,8 @@ export class ReadAvailableSlotsForService {
   async handle(req: IReadAvailableSlotsForServiceReq) {
     const timeZone = this.config.timeZone
 
-    const start = new Date()
-    const end = addCompleteDays(start, this.config.maxFutureDays, timeZone)
+    const start = new Date(`${req.date}T00:00:00`)
+    const end = new Date(`${req.date}T23:59:59`)
 
     const appointments = await this.appointmentRepository.findOverlapping(start, end)
     const service = await this.serviceRepository.findOrThrow(req.serviceId)

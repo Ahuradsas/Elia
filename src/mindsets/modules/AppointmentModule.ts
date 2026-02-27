@@ -1,4 +1,5 @@
 import { Appointment } from '@/entity/Appointment'
+import type { IAppointmentStatus } from '@/entity/Appointment'
 import { AppointmentRepository } from '@/repository/AppointmentRepository'
 import { Chat, description, isDate, isNumber, isString, mindsetModule } from '@wabot-dev/framework'
 
@@ -77,7 +78,9 @@ export class UpdateAppointmentReq {
   zone?: string
 
   @isString()
-  @description('Apuntes o información adicional para la prestación del servicio (opcional, solo si cambia)')
+  @description(
+    'Apuntes o información adicional para la prestación del servicio (opcional, solo si cambia)',
+  )
   notes?: string
 
   @isDate()
@@ -87,6 +90,20 @@ export class UpdateAppointmentReq {
   @isDate()
   @description('Nueva fecha y hora de finalización para la cita (opcional, solo si cambia)')
   scheduledEndAt?: Date
+
+  @isString()
+  @description('Status de la cita (opcional, solo si cambia)')
+  status?: IAppointmentStatus
+}
+
+export class FindUpcomingReq {
+  @isString()
+  @description('ID del cliente a buscar')
+  clientId!: string
+
+  @isString()
+  @description('Status de la cita a buscar')
+  status?: string
 }
 
 @mindsetModule()
@@ -120,7 +137,9 @@ export class AppointmentModule {
     return appointment
   }
 
-  @description('Update an existing appointment. Only provide the fields that need to be changed.')
+  @description(
+    'Update an existing appointment. Puedes cancelar la cita cambiando el status a "cancelada". Only provide the fields that need to be changed.',
+  )
   async updateAppointment(req: UpdateAppointmentReq): Promise<Appointment> {
     const appointment = await this.appointmentRepository.find(req.appointmentId)
     if (!appointment) throw new Error(`Appointment ${req.appointmentId} not found`)
@@ -136,17 +155,14 @@ export class AppointmentModule {
     if (req.notes !== undefined) data.notes = req.notes
     if (req.scheduledAt !== undefined) data.scheduledAt = req.scheduledAt.getTime()
     if (req.scheduledEndAt !== undefined) data.scheduledEndAt = req.scheduledEndAt.getTime()
+    if (req.status !== undefined) data.status = req.status
 
     await this.appointmentRepository.update(appointment)
     return appointment
   }
 
-  // @description('Cancel an appointment')
-  // async cancelAppointment(req: AppointmentIdReq): Promise<Appointment> {
-  //   const appointment = await this.appointmentRepository.find(req.appointmentId)
-  //   if (!appointment) throw new Error(`Appointment ${req.appointmentId} not found`)
-  //   appointment.cancel()
-  //   await this.appointmentRepository.update(appointment)
-  //   return appointment
-  // }
+  @description('Find all appointments for an user, you can filter by status')
+  async findUpcoming(req: FindUpcomingReq): Promise<Appointment[]> {
+    return this.appointmentRepository.findByClientId(req.clientId, req.status)
+  }
 }
